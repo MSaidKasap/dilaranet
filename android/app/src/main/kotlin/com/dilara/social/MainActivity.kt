@@ -1,0 +1,33 @@
+package com.dilara.social  // ✅ net. değil com.
+
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import android.content.Intent
+import io.flutter.embedding.android.FlutterActivity
+import io.flutter.embedding.engine.FlutterEngine
+import io.flutter.plugin.common.MethodChannel
+
+class MainActivity : FlutterActivity() {
+    private val CHANNEL = "net.dilara.social/widget"
+
+    override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
+        super.configureFlutterEngine(flutterEngine)
+
+        MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
+            .setMethodCallHandler { call, result ->
+                if (call.method == "updateAndroidWidget") {
+                    val manager = AppWidgetManager.getInstance(this)
+                    val ids = manager.getAppWidgetIds(
+                        ComponentName(this, PrayerTimesWidgetReceiver::class.java)
+                    )
+                    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                    }
+                    sendBroadcast(intent)
+                    result.success("OK")
+                } else {
+                    result.notImplemented()
+                }
+            }
+    }
+}

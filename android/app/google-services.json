@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "747191488222",
+    "project_id": "dilara-77846",
+    "storage_bucket": "dilara-77846.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:747191488222:android:61b8550e2e4167551d7c4f",
+        "android_client_info": {
+          "package_name": "com.dilara.social"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCts5stv6d76OZt_j4A5uyXjEzx8f0Msm4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
