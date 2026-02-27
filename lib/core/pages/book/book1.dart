@@ -402,15 +402,19 @@ class _ImageViewerCarouselState extends State<ImageViewerCarousel>
     }
   }
 
-  void stopAudio() {
-    assetsAudioPlayer.stop();
+  Future<void> stopAudio({bool disableAutoPlay = true}) async {
+    try {
+      await assetsAudioPlayer.stop();
+    } catch (_) {}
+
     HapticFeedback.lightImpact();
 
-    // ✅ Ses durdurulunca otomatik çalmayı kapat
-    if (_autoPlayMode) {
+    // ✅ sadece kullanıcı manuel stop edince kapat
+    if (disableAutoPlay && _autoPlayMode) {
       setState(() {
         _autoPlayMode = false;
       });
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -427,7 +431,7 @@ class _ImageViewerCarouselState extends State<ImageViewerCarousel>
             duration: const Duration(seconds: 2),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.only(bottom: 100, left: 20, right: 20),
-            backgroundColor: Colors.grey[800],
+            backgroundColor: Colors.grey,
           ),
         );
       }
@@ -438,7 +442,7 @@ class _ImageViewerCarouselState extends State<ImageViewerCarousel>
     if (_isLoadingAudio) return;
 
     if (_isPlayingNotifier.value) {
-      stopAudio();
+      stopAudio(disableAutoPlay: true); // ✅ manuel stop
     } else {
       playAudio(imageNumber);
     }
@@ -493,18 +497,20 @@ class _ImageViewerCarouselState extends State<ImageViewerCarousel>
       children: [
         PageView.builder(
           controller: _pageController,
-          onPageChanged: (index) {
-            stopAudio();
+          onPageChanged: (index) async {
+            await stopAudio(
+              disableAutoPlay: false,
+            ); // ✅ sadece sesi kes, autoPlay kalsın
+
             setState(() {
               currentPage = index;
             });
 
-            // ✅ AppBar'daki sayfa numarasını güncelle
             widget.onPageChanged(index);
 
             final imageNumber = index + 3;
             if (_autoPlayMode && imagesWithAudio.contains(imageNumber)) {
-              Future.delayed(const Duration(milliseconds: 500), () {
+              Future.delayed(const Duration(milliseconds: 300), () {
                 if (mounted) playAudio(imageNumber);
               });
             }
@@ -985,16 +991,7 @@ class _ContentPageState extends State<ContentPage>
         backgroundColor: colorScheme.surface,
         foregroundColor: colorScheme.onSurface,
         elevation: 0,
-        actions: [
-          IconButton(
-            icon: Icon(_showFullBook ? Icons.list : Icons.chrome_reader_mode),
-            onPressed: () {
-              setState(() {
-                _showFullBook = !_showFullBook;
-              });
-            },
-          ),
-        ],
+        actions: [],
       ),
       body: FadeTransition(
         opacity: _fadeAnimation,

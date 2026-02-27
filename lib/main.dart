@@ -28,6 +28,39 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   }
 }
 
+// -----------------------------------------------
+// 🔔 AwesomeNotifications Global Listener Metodları
+// Bu metodlar static veya top-level olmak ZORUNDA
+// -----------------------------------------------
+
+@pragma('vm:entry-point')
+Future<void> onNotificationCreatedMethod(
+  ReceivedNotification receivedNotification,
+) async {
+  print('🔔 Bildirim oluşturuldu: ${receivedNotification.title}');
+}
+
+@pragma('vm:entry-point')
+Future<void> onNotificationDisplayedMethod(
+  ReceivedNotification receivedNotification,
+) async {
+  print('📺 Bildirim gösterildi: ${receivedNotification.title}');
+}
+
+@pragma('vm:entry-point')
+Future<void> onDismissActionReceivedMethod(
+  ReceivedAction receivedAction,
+) async {
+  print('❌ Bildirim kapatıldı: ${receivedAction.title}');
+}
+
+@pragma('vm:entry-point')
+Future<void> onActionReceivedMethod(ReceivedAction receivedAction) async {
+  print('👆 Bildirime tıklandı: ${receivedAction.title}');
+  // Buraya bildirime tıklandığında yapılacak işlemleri ekleyebilirsin
+  // Örneğin: belirli bir sayfaya yönlendirme
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -47,7 +80,15 @@ Future<void> main() async {
       importance: NotificationImportance.High,
       channelShowBadge: true,
     ),
-  ], debug: true);
+  ], debug: false);
+
+  // ✅ Listener'lar initialize'dan hemen sonra kaydediliyor
+  await AwesomeNotifications().setListeners(
+    onActionReceivedMethod: onActionReceivedMethod,
+    onNotificationCreatedMethod: onNotificationCreatedMethod,
+    onNotificationDisplayedMethod: onNotificationDisplayedMethod,
+    onDismissActionReceivedMethod: onDismissActionReceivedMethod,
+  );
 
   await _requestNotificationPermissions();
 
@@ -58,7 +99,9 @@ Future<void> main() async {
   );
 
   _setupFirebaseListeners();
-  await _printDeviceTokensSafe();
+
+  // Token alma arka planda, uygulamayı bloklamıyor
+  _printDeviceTokensSafe();
 
   runApp(const MyApp());
 }
@@ -71,19 +114,6 @@ Future<void> _requestNotificationPermissions() async {
     sound: true,
   );
   print('🔔 FCM izin: ${settings.authorizationStatus}');
-
-  final isAllowed = await AwesomeNotifications().isNotificationAllowed();
-  if (!isAllowed) {
-    await AwesomeNotifications().requestPermissionToSendNotifications(
-      channelKey: 'prayer_channel',
-      permissions: [
-        NotificationPermission.Alert,
-        NotificationPermission.Sound,
-        NotificationPermission.Badge,
-        NotificationPermission.Vibration,
-      ],
-    );
-  }
 }
 
 void _setupFirebaseListeners() {
@@ -97,22 +127,21 @@ void _setupFirebaseListeners() {
   });
 }
 
-Future<void> _printDeviceTokensSafe() async {
+void _printDeviceTokensSafe() async {
   final fm = FirebaseMessaging.instance;
 
   if (Platform.isIOS) {
     String? apns;
-    for (int i = 0; i < 5; i++) {
-      // 15'ten 5'e düşür
+    for (int i = 0; i < 3; i++) {
       apns = await fm.getAPNSToken();
       if (apns != null) break;
-      print('⏳ APNs bekleniyor (${i + 1}/5)...');
-      await Future.delayed(const Duration(seconds: 1));
+      print('⏳ APNs bekleniyor (${i + 1}/3)...');
+      await Future.delayed(const Duration(seconds: 2));
     }
 
     if (apns == null) {
-      print('⚠️ APNs alınamadı, uygulama normal başlıyor.');
-      return; // Token olmadan devam et, beyaz ekranda kalma
+      print('⚠️ APNs alınamadı, uygulama normal devam ediyor.');
+      return;
     }
 
     print('🍎 APNs: $apns');

@@ -323,7 +323,11 @@ class _PostDetailPageState extends State<PostDetailPage>
 }
 
 bool _hasRealHtmlContent(String html) {
-  // script/style'ı da temizle (güvenli)
+  // ✅ Galeri / resim var mı? (img varsa içerik var say)
+  final hasImage = RegExp(r'<img\b', caseSensitive: false).hasMatch(html);
+  if (hasImage) return true;
+
+  // script/style temizle
   var s = html
       .replaceAll(
         RegExp(r'<script[^>]*>[\s\S]*?<\/script>', caseSensitive: false),
@@ -337,11 +341,11 @@ bool _hasRealHtmlContent(String html) {
   // tüm tag'leri kaldır
   s = s.replaceAll(RegExp(r'<[^>]+>'), '');
 
-  // html entity &nbsp; gibi şeyleri düzelt
+  // entity decode
   s = HtmlCharacterEntities.decode(s);
 
-  // boşlukları temizle
-  s = s.replaceAll('\u00A0', '').trim(); // nbsp char
+  // boşluk temizle
+  s = s.replaceAll('\u00A0', '').trim();
 
   return s.isNotEmpty;
 }

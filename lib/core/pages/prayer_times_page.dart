@@ -12,6 +12,7 @@ import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart';
 import '../../utill/notifications.dart';
 import '../../utill/database_helper.dart';
+import 'notification_settings_page.dart';
 
 class PrayerTimesPage extends StatefulWidget {
   const PrayerTimesPage({Key? key}) : super(key: key);
@@ -35,10 +36,92 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   bool locationPermissionGranted = false;
 
   bool _initialized = false;
-  bool _isFetching = false; // aynı anda 2 fetch olmasın
+  bool _isFetching = false;
   String currentTime = '';
 
   final NotificationService _notificationService = NotificationService();
+
+  // 7 günlük bildirim zamanlaması (bugün dahil)
+  // awesome_notifications limiti: 64 bildirim
+  // 7 gün × 6 vakit = 42 → limit altında ✅
+  Future<void> _applyNotificationScheduleIfEnabled(
+    Map<String, String> todayTimes,
+  ) async {
+    final sp = await SharedPreferences.getInstance();
+    final enabled = sp.getBool('notify_enabled') ?? false;
+    if (!enabled) return;
+
+    final allowed = await _notificationService.isNotificationAllowed();
+    if (!allowed) return;
+
+    final offset = sp.getInt('notify_offset_minutes') ?? 28;
+    final offsetIsBefore = sp.getBool('notify_offset_is_before') ?? true;
+
+    const prayerKeys = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+    final prayerEnabled = <String, bool>{};
+    final prayerSoundId = <String, String>{};
+    final prayerIsSilent = <String, bool>{};
+
+    for (final key in prayerKeys) {
+      final jsonStr = sp.getString('prayer_setting_$key');
+      if (jsonStr != null) {
+        try {
+          final Map<String, dynamic> decoded = jsonDecode(jsonStr);
+          prayerEnabled[key] = decoded['enabled'] ?? (key != 'Sunrise');
+          prayerSoundId[key] = decoded['soundId'] ?? 'default';
+          prayerIsSilent[key] = decoded['isSilent'] ?? false;
+        } catch (_) {
+          prayerEnabled[key] = key != 'Sunrise';
+          prayerSoundId[key] = 'default';
+          prayerIsSilent[key] = false;
+        }
+      } else {
+        prayerEnabled[key] = key != 'Sunrise';
+        prayerSoundId[key] = 'default';
+        prayerIsSilent[key] = false;
+      }
+    }
+
+    await _notificationService.cancelAllNotifications();
+
+    final today = DateTime.now();
+
+    // Bugün
+    await _notificationService.scheduleForDay(
+      day: today,
+      times: todayTimes,
+      locationText: currentLocation.split(',').first,
+      offsetMinutes: offset,
+      offsetIsBefore: offsetIsBefore,
+      prayerEnabled: prayerEnabled,
+      prayerSoundId: prayerSoundId,
+      prayerIsSilent: prayerIsSilent,
+    );
+
+    // Sonraki 6 gün (toplam 7 gün = 42 bildirim, limit 64 altında)
+    int scheduled = 1;
+    for (int i = 1; i <= 6; i++) {
+      final day = today.add(Duration(days: i));
+      final times = await _getPrayerTimesForDate(day);
+      if (times != null) {
+        await _notificationService.scheduleForDay(
+          day: day,
+          times: times,
+          locationText: currentLocation.split(',').first,
+          offsetMinutes: offset,
+          offsetIsBefore: offsetIsBefore,
+          prayerEnabled: prayerEnabled,
+          prayerSoundId: prayerSoundId,
+          prayerIsSilent: prayerIsSilent,
+        );
+        scheduled++;
+      } else {
+        print('⚠️ ${day.day}/${day.month} için DB\'de vakit yok, atlandı');
+      }
+    }
+
+    print('✅ Toplam $scheduled gün için bildirim zamanlandı');
+  }
 
   final Map<String, String> prayerNames = {
     'Fajr': 'İmsak',
@@ -113,8 +196,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   @override
   void dispose() {
     _timer?.cancel();
-    // ❗ DB'yi burada kapatma -> sayfalar arası gidip gelince “db hazır değil” / race condition yapabiliyor
-    // _database?.close();
     super.dispose();
   }
 
@@ -160,7 +241,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     }
   }
 
-  // Veritabanından namaz vakitlerini yükle
   Future<void> _loadPrayerTimesFromDB() async {
     try {
       final db = _database;
@@ -227,8 +307,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
         limit: 1,
       );
 
-      // ✅ Cache varsa UI’yı hemen aç
-      // ✅ Cache varsa UI'yı hemen aç
       if (prayerTimesResult.isNotEmpty) {
         final times = prayerTimesResult.first;
 
@@ -250,16 +328,18 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
 
         _calculateNextPrayer();
 
-        // ✅ BURASI EKLENDİ
         await _savePrayerTimesToAppGroup(
           newPrayerTimes.map((k, v) => MapEntry(k, v.toString())),
         );
-
+        print('✅ Widget\'a namaz vakitleri kaydedildi');
         _updatePrayerTimesInBackground();
+
+        await _applyNotificationScheduleIfEnabled(
+          newPrayerTimes.map((k, v) => MapEntry(k, v.toString())),
+        );
         return;
       }
 
-      // Bugünün verisi yoksa API
       final pos = currentPosition;
       if (pos == null) {
         _getCurrentLocation();
@@ -275,7 +355,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     }
   }
 
-  // Arka planda verileri güncelle (UI’yı kilitlemesin)
   Future<void> _updatePrayerTimesInBackground() async {
     final db = _database;
     if (db == null) return;
@@ -305,12 +384,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
 
       print('🔄 Arka plan güncelleme başlıyor ($daysDifference gün geçti)');
 
-      await _fetchPrayerTimesFor30Days(
-        lat,
-        lon,
-        locationId,
-        background: true, // ✅ loader açma
-      );
+      await _fetchPrayerTimesFor30Days(lat, lon, locationId, background: true);
     } catch (e) {
       print('❌ Arka plan güncelleme hatası: $e');
     }
@@ -653,7 +727,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
       final startDate = DateTime.now();
       final futures = <Future<void>>[];
 
-      // Aynı anda 30 istek yoğun olabilir. İstersen 10-10 batch yaparız.
       for (int i = 0; i < 30; i++) {
         final targetDate = startDate.add(Duration(days: i));
         futures.add(
@@ -730,7 +803,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
         'created_at': DateTime.now().toIso8601String(),
       }, conflictAlgorithm: ConflictAlgorithm.replace);
     } catch (e) {
-      // sessiz geçiyoruz ama log bırakıyoruz
       print('❌ ${date.day}/${date.month} için veri alma hatası: $e');
     }
   }
@@ -770,7 +842,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
 
       _calculateNextPrayer();
 
-      // ✅ Widget'a kaydet
       await _savePrayerTimesToAppGroup(
         newPrayerTimes.map((k, v) => MapEntry(k, v)),
       );
@@ -843,7 +914,6 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   }
 
   Future<List<Map<String, dynamic>>> getNext5DaysPrayers() async {
-    // Sen zaten DatabaseHelper kullanıyorsun; aynı DB dosyasını işaret ettiğini varsayıyorum.
     final db = await DatabaseHelper().database;
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
     return await db.rawQuery(
@@ -960,7 +1030,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
                               child: Column(
                                 children: [
                                   Text(
-                                    '$nextPrayerName ezanına kalan',
+                                    '$nextPrayerName Vaktine kalan',
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 16,
@@ -1291,6 +1361,22 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
             ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // ✅ Mevcut namaz vakitlerini settings sayfasına geçir
+          final todayTimes = prayerTimes != null
+              ? prayerTimes!.map((k, v) => MapEntry(k, v.toString()))
+              : null;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) =>
+                  NotificationSettingsPage(todayPrayerTimes: todayTimes),
+            ),
+          );
+        },
+        child: const Icon(Icons.notifications),
       ),
     );
   }
