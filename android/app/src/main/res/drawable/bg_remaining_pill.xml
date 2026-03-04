@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/bg_remaining_pill.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#1AFFFFFF" />
+    <corners android:radius="8dp" />
+</shape>

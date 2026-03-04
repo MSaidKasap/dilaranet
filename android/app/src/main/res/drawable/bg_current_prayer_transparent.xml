@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/bg_current_prayer_transparent.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#2AFFD700" />
+    <corners android:radius="6dp" />
+</shape>

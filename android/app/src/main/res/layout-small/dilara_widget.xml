@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#121212"
+    android:clipToOutline="true"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <!-- Sadece en temel bilgiler: vakit adı ve saat -->
+    <TextView
+        android:id="@+id/widget_next_prayer_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="Öğle"
+        android:textColor="#FFD600"
+        android:textSize="15sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/widget_next_prayer_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-black"
+        android:text="13:16"
+        android:textColor="#FFFFFF"
+        android:textSize="20sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <TextView
+        android:id="@+id/widget_remaining_time"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif-medium"
+        android:text="01 s 20 dk"
+        android:textColor="#FFD600"
+        android:textSize="10sp"
+        android:maxLines="1"
+        android:ellipsize="end" />
+
+    <!-- Backward compatibility: next2 label/time (gizli) -->
+    <TextView
+        android:id="@+id/widget_next2_label"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+    <TextView
+        android:id="@+id/widget_next2_time"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:visibility="gone" />
+</LinearLayout>

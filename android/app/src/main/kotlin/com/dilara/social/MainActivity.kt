@@ -2,6 +2,7 @@ package com.dilara.social  // ✅ net. değil com.
 
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
+import android.content.Context
 import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
@@ -15,18 +16,80 @@ class MainActivity : FlutterActivity() {
 
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, CHANNEL)
             .setMethodCallHandler { call, result ->
-                if (call.method == "updateAndroidWidget") {
-                    val manager = AppWidgetManager.getInstance(this)
-                    val ids = manager.getAppWidgetIds(
-                        ComponentName(this, PrayerTimesWidgetReceiver::class.java)
-                    )
-                    val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
-                        putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                when (call.method) {
+                    "savePrayerTimes" -> {
+                        try {
+                            val args = call.arguments as? Map<*, *>
+                            if (args == null) {
+                                result.error("INVALID_ARGS", "Map bekleniyor", null)
+                                return@setMethodCallHandler
+                            }
+
+                            // SharedPreferences'e kaydet (app ve widget için)
+                            val prefs = getSharedPreferences(
+                                "FlutterSharedPreferences",
+                                Context.MODE_PRIVATE
+                            )
+                            with(prefs.edit()) {
+                                putString("flutter.widget_fajr", args["fajr"].toString())
+                                putString("flutter.widget_sunrise", args["sunrise"].toString())
+                                putString("flutter.widget_dhuhr", args["dhuhr"].toString())
+                                putString("flutter.widget_asr", args["asr"].toString())
+                                putString("flutter.widget_maghrib", args["maghrib"].toString())
+                                putString("flutter.widget_isha", args["isha"].toString())
+                                putString("flutter.widget_location", args["location"].toString())
+                                putString("flutter.widget_date", args["date"].toString())
+                                commit() // apply() yerine commit() kullan
+                            }
+
+                            // HomeWidget için bireysel ve özet verisi kaydet
+                            val homeWidgetPrefs = getSharedPreferences("HomeWidget", Context.MODE_PRIVATE)
+                            with(homeWidgetPrefs.edit()) {
+                                putString("widget_fajr", args["fajr"].toString())
+                                putString("widget_sunrise", args["sunrise"].toString())
+                                putString("widget_dhuhr", args["dhuhr"].toString())
+                                putString("widget_asr", args["asr"].toString())
+                                putString("widget_maghrib", args["maghrib"].toString())
+                                putString("widget_isha", args["isha"].toString())
+                                putString("widget_date", args["date"].toString())
+                                putString("widget_location", args["location"].toString())
+                                val summary = "Fajr: ${args["fajr"]}\nSunrise: ${args["sunrise"]}\nDhuhr: ${args["dhuhr"]}\nAsr: ${args["asr"]}\nMaghrib: ${args["maghrib"]}\nIsha: ${args["isha"]}\nLokasyon: ${args["location"]}\nTarih: ${args["date"]}"
+                                putString("prayer_times", summary)
+                                commit()
+                            }
+
+                            val manager = AppWidgetManager.getInstance(this@MainActivity)
+                            val ids = manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, PrayerTimesWidgetReceiver::class.java)
+                            )
+                            if (ids.isNotEmpty()) {
+                                val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                                    setComponent(ComponentName(this@MainActivity, PrayerTimesWidgetReceiver::class.java))
+                                }
+                                sendBroadcast(intent)
+                            }
+                            result.success("OK")
+                        } catch (e: Exception) {
+                            result.error("ERROR", e.message, null)
+                        }
                     }
-                    sendBroadcast(intent)
-                    result.success("OK")
-                } else {
-                    result.notImplemented()
+                    "updateAndroidWidget" -> {
+                        try {
+                            val manager = AppWidgetManager.getInstance(this@MainActivity)
+                            val ids = manager.getAppWidgetIds(
+                                ComponentName(this@MainActivity, PrayerTimesWidgetReceiver::class.java)
+                            )
+                            val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+                                putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
+                            }
+                            sendBroadcast(intent)
+                            result.success("OK")
+                        } catch (e: Exception) {
+                            result.error("ERROR", e.message, null)
+                        }
+                    }
+                    else -> result.notImplemented()
                 }
             }
     }

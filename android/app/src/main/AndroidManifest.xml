@@ -51,7 +51,7 @@
         </service>
 
         <receiver
-            android:name=".PrayerTimesWidgetReceiver"
+            android:name="com.dilara.social.PrayerTimesWidgetReceiver"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
@@ -61,6 +61,35 @@
                 android:resource="@xml/prayer_times_widget_info" />
         </receiver>
 
+        <receiver
+            android:name="com.dilara.social.PrayerTimesHorizontalWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_times_widget_horizontal_info" />
+        </receiver>
+
+        <!-- Büyük widget için ayrı receiver (farklı class, farklı info xml) -->
+        <receiver
+            android:name="com.dilara.social.PrayerTimesBigWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/prayer_times_widget_big_info" />
+        </receiver>
+        <receiver
+            android:name="com.dilara.social.PrayerAlarmReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.dilara.social.PRAYER_TIME_TICK" />
+            </intent-filter>
+        </receiver>
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" /> <!-- Firebase Analytics devre dışı bırakmak için (isteğe bağlı) -->

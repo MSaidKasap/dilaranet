@@ -1,0 +1,203 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#181818"
+    android:orientation="horizontal"
+    android:padding="10dp">
+
+    <!-- Leading mosque icon -->
+    <ImageView
+        android:id="@+id/widget_mosque_icon"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="8dp"
+        android:background="#181818"
+        android:contentDescription="Mosque icon"
+        android:src="@drawable/mosque"
+        android:tint="#B0B0B0" />
+
+    <!-- İmsak -->
+
+    <!-- Güneş -->
+
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_fajr_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="İmsak"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/widget_fajr_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="05:30"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <!-- Güneş (Sunrise) block moved here after İmsak -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_sunrise_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="Güneş"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/widget_sunrise_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="06:50"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_dhuhr_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="Öğle"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/widget_dhuhr_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="13:16"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_asr_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="İkindi"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/widget_asr_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="16:45"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_maghrib_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="Akşam"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/widget_maghrib_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="18:50"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/widget_isha_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="Yatsı"
+            android:textColor="#B0B0B0"
+            android:textSize="13sp" />
+
+        <TextView
+            android:id="@+id/widget_isha_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@android:color/transparent"
+            android:gravity="center"
+            android:text="20:10"
+            android:textColor="#FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+
+    <!-- Öğle -->
+
+    <!-- İkindi -->
+
+    <!-- Akşam -->
+
+    <!-- Yatsı -->
+</LinearLayout>

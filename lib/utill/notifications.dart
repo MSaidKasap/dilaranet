@@ -36,61 +36,6 @@ class NotificationService {
           enableLights: true,
           ledColor: Colors.blue,
         ),
-        NotificationChannel(
-          channelKey: 'test_medine',
-          channelName: 'Test (Medine)',
-          channelDescription: 'Medine ezanı',
-          importance: NotificationImportance.High,
-          playSound: true,
-          soundSource: 'resource://raw/medine',
-          enableVibration: true,
-          enableLights: true,
-          ledColor: Colors.blue,
-        ),
-        NotificationChannel(
-          channelKey: 'test_mekke',
-          channelName: 'Test (Mekke)',
-          channelDescription: 'Mekke ezanı',
-          importance: NotificationImportance.High,
-          playSound: true,
-          soundSource: 'resource://raw/mekke',
-          enableVibration: true,
-          enableLights: true,
-          ledColor: Colors.blue,
-        ),
-        NotificationChannel(
-          channelKey: 'test_ayasofya',
-          channelName: 'Test (Ayasofya)',
-          channelDescription: 'Ayasofya ezanı',
-          importance: NotificationImportance.High,
-          playSound: true,
-          soundSource: 'resource://raw/ayasofya',
-          enableVibration: true,
-          enableLights: true,
-          ledColor: Colors.blue,
-        ),
-        NotificationChannel(
-          channelKey: 'test_zikir',
-          channelName: 'Test (Zikir)',
-          channelDescription: 'Zikir sesi',
-          importance: NotificationImportance.High,
-          playSound: true,
-          soundSource: 'resource://raw/zikir',
-          enableVibration: true,
-          enableLights: true,
-          ledColor: Colors.blue,
-        ),
-        NotificationChannel(
-          channelKey: 'test_ney',
-          channelName: 'Test (Ney)',
-          channelDescription: 'Ney melodisi',
-          importance: NotificationImportance.High,
-          playSound: true,
-          soundSource: 'resource://raw/ney',
-          enableVibration: true,
-          enableLights: true,
-          ledColor: Colors.blue,
-        ),
       ], debug: true);
 
       await Future.delayed(const Duration(milliseconds: 500));
@@ -126,16 +71,6 @@ class NotificationService {
 
   String _channelKeyForSoundId(String soundId) {
     switch (soundId) {
-      case 'ezan':
-        return 'test_medine';
-      case 'kuran':
-        return 'test_mekke';
-      case 'salat':
-        return 'test_ayasofya';
-      case 'zikir':
-        return 'test_zikir';
-      case 'ney':
-        return 'test_ney';
       default:
         return 'test_default';
     }
@@ -143,16 +78,6 @@ class NotificationService {
 
   String? _iosSoundFileForSoundId(String soundId) {
     switch (soundId) {
-      case 'ezan':
-        return 'medine.caf';
-      case 'kuran':
-        return 'mekke.caf';
-      case 'salat':
-        return 'ayasofya.caf';
-      case 'zikir':
-        return 'zikir.caf';
-      case 'ney':
-        return 'ney.caf';
       default:
         return null;
     }
@@ -336,13 +261,9 @@ class NotificationService {
         ],
       );
 
-      if (created) {
-        print(
-          "✅ Zamanlandı: $prayerName @ $notificationTime (ses: $soundId, sessiz: $isSilent)",
-        );
-      } else {
-        print("❌ Zamanlama başarısız: $prayerName");
-      }
+      print(
+        "✅ Zamanlandı: $prayerName @ $notificationTime (ses: $soundId, sessiz: $isSilent)",
+      );
     } catch (e) {
       print("❌ schedulePrayerNotification hatası [$prayerName]: $e");
     }

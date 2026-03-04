@@ -56,7 +56,6 @@ flutter:
   
   assets:
     - assets/img/
-    - assets/sounds/
     - assets/img/size/
     - assets/animations/download.json
     - assets/animations/error.json
