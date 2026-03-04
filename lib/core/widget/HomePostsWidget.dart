@@ -56,7 +56,7 @@ class _HomePostsWidgetState extends State<HomePostsWidget> {
   Future<void> fetchCategories() async {
     try {
       final response = await http.get(
-        Uri.parse('https://dilara.net/wp-json/mobil-app/v1/settings'),
+        Uri.parse('${URL}wp-json/mobil-app/v1/settings'),
       );
 
       if (response.statusCode == 200) {
@@ -732,7 +732,7 @@ Future<List<dynamic>> fetchPostsByCategory(int categoryId) async {
   try {
     final response = await http.get(
       Uri.parse(
-        'https://dilara.net/wp-json/wp/v2/posts?categories=$categoryId&per_page=20',
+        '${URL}/wp-json/wp/v2/posts?categories=$categoryId&per_page=20',
       ),
     );
 

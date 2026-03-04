@@ -342,7 +342,7 @@ class _ImageViewerCarouselState extends State<ImageViewerCarousel>
         });
         HapticFeedback.lightImpact();
       } else {
-        final cdnUrl = 'https://cnd.dilara.net/Audio/$imageNumber.mp3';
+        final cdnUrl = 'https://cdn.dilara.net/Audio/$imageNumber.mp3';
         print('🌐 Local yok, CDN\'den ses çalınıyor: $cdnUrl');
 
         await assetsAudioPlayer
@@ -465,10 +465,10 @@ class _ImageViewerCarouselState extends State<ImageViewerCarousel>
       }
 
       print('❌ Resim local\'de bulunamadı, CDN kullanılıyor: $fileName');
-      return 'https://cnd.dilara.net/img/$fileName';
+      return 'https://cdn.dilara.net/img/$fileName';
     } catch (e) {
       print('❌ Resim yolu hatası: $e');
-      return 'https://cnd.dilara.net/img/$fileName';
+      return 'https://cdn.dilara.net/img/$fileName';
     }
   }
 

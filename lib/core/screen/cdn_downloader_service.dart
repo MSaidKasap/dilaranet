@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/foundation.dart';
 
 class CdnDownloaderService {
-  static const String baseUrl = 'https://cnd.dilara.net';
+  static const String baseUrl = 'https://cdn.dilara.net';
   static const String versionKey = 'cdn_version';
   static const String currentVersion = '1.0.2';
 

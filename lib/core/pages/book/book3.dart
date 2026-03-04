@@ -340,7 +340,7 @@ class _ImageViewerCarouselState3 extends State<ImageViewerCarousel3>
         });
         HapticFeedback.lightImpact();
       } else {
-        final cdnUrl = 'https://cnd.dilara.net/Audio/$imageNumber.mp3';
+        final cdnUrl = 'https://cdn.dilara.net/Audio/$imageNumber.mp3';
         print('🌐 CDN\'den ses çalınıyor: $cdnUrl');
 
         await assetsAudioPlayer
@@ -457,11 +457,11 @@ class _ImageViewerCarouselState3 extends State<ImageViewerCarousel3>
       if (isSevgi) {
         // SEVGİ KİTABI
         localPath = '${appDir.path}/img/sevgi ($fileName)';
-        remoteUrl = 'https://cnd.dilara.net/img/sevgi%20($fileName)';
+        remoteUrl = 'https://cdn.dilara.net/img/sevgi%20($fileName)';
       } else {
         // SIZE KİTABI
         localPath = '${appDir.path}/img/size/$fileName';
-        remoteUrl = 'https://cnd.dilara.net/img/size/$fileName';
+        remoteUrl = 'https://cdn.dilara.net/img/size/$fileName';
       }
 
       if (await File(localPath).exists()) {
@@ -473,8 +473,8 @@ class _ImageViewerCarouselState3 extends State<ImageViewerCarousel3>
     } catch (e) {
       print('❌ Resim yolu hatası: $e');
       return isSevgi
-          ? 'https://cnd.dilara.net/img/sevgi%20($fileName)'
-          : 'https://cnd.dilara.net/img/size/$fileName';
+          ? 'https://cdn.dilara.net/img/sevgi%20($fileName)'
+          : 'https://cdn.dilara.net/img/size/$fileName';
     }
   }
 

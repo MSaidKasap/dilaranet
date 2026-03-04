@@ -194,10 +194,10 @@ class _ImageViewerCarouselState2 extends State<ImageViewerCarousel2> {
       }
 
       print('❌ Resim local\'de bulunamadı, CDN kullanılıyor: $relativePath');
-      return 'https://cnd.dilara.net/img/$relativePath';
+      return 'https://cdn.dilara.net/img/$relativePath';
     } catch (e) {
       print('❌ Resim yolu hatası: $e');
-      return 'https://cnd.dilara.net/img/$relativePath';
+      return 'https://cdn.dilara.net/img/$relativePath';
     }
   }
 
