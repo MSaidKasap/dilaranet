@@ -43,8 +43,8 @@ Flutter tabanlı kapsamlı İslami içerik uygulaması. WordPress'ten dinamik i�
 
 ```bash
 # 1. Repoyu klonla
-git clone https://github.com/kullanici/dilara_app.git
-cd dilara_app
+git clone https://github.com/MSaidKasap/dilaranet
+cd dilaranet
 
 # 2. Bağımlılıkları yükle
 flutter pub get
