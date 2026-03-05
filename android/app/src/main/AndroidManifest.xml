@@ -6,9 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"/>
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <queries>
         <intent>
@@ -23,6 +21,11 @@
         android:enableOnBackInvokedCallback="true"
         android:icon="@mipmap/ic_launcher"
         android:label="Dilara">
+        <receiver android:name=".WidgetAlarmReceiver" android:enabled="true" android:exported="false">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <activity
             android:name=".MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
@@ -83,13 +86,7 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/prayer_times_widget_big_info" />
         </receiver>
-        <receiver
-            android:name="com.dilara.social.PrayerAlarmReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.dilara.social.PRAYER_TIME_TICK" />
-            </intent-filter>
-        </receiver>
+
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" /> <!-- Firebase Analytics devre dışı bırakmak için (isteğe bağlı) -->

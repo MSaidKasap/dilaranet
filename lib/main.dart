@@ -168,6 +168,88 @@ Future<void> showFirebaseNotificationWithAwesome(RemoteMessage message) async {
   );
 }
 
+Future<void> showPrayerTimesOngoingNotification({
+  required String currentPrayer,
+  required Map<String, String> allTimes,
+  BuildContext? context,
+}) async {
+  // Camii ikonunu eklemek için drawable/ic_mosque_placeholder.png dosyasını kullanabilirsin
+  // Yatay widget tasarımına uygun, ikon ve renklerle zenginleştirilmiş notification body oluştur
+  // Vakit sırası: İmsak, Güneş, Öğle, İkindi, Akşam, Yatsı
+  final vakitOrder = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
+  final vakitLabels = {
+    'Fajr': 'İmsak',
+    'Sunrise': 'Güneş',
+    'Dhuhr': 'Öğle',
+    'Asr': 'İkindi',
+    'Maghrib': 'Akşam',
+    'Isha': 'Yatsı',
+  };
+  // Aktif vakti vurgulamak için hilal simgesi (☪️)
+  String vakitRow = vakitOrder
+      .map((key) {
+        final label = vakitLabels[key] ?? key;
+        final value = allTimes[key] ?? '--:--';
+        if (key == currentPrayer) {
+          return '☪️ $label: $value';
+        } else {
+          return '$label: $value';
+        }
+      })
+      .join('\n');
+
+  // Bildirim izni ve ongoing notification kontrolü
+  final isAllowed = await AwesomeNotifications().isNotificationAllowed();
+  if (!isAllowed) {
+    if (context != null) {
+      // Kullanıcıya izin ve pil optimizasyonu hakkında bilgi ver
+      showDialog(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Bildirim İzni Gerekli'),
+          content: const Text(
+            'Namaz vakitleri bildirimi için bildirim izni ve pil optimizasyonunu kapatmanız önerilir. Lütfen uygulama ayarlarından izinleri kontrol edin.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              child: const Text('Tamam'),
+            ),
+          ],
+        ),
+      );
+    }
+    await AwesomeNotifications().requestPermissionToSendNotifications(
+      channelKey: 'prayer_channel',
+      permissions: [
+        NotificationPermission.Alert,
+        NotificationPermission.Sound,
+        NotificationPermission.Badge,
+        NotificationPermission.Vibration,
+      ],
+    );
+    return;
+  }
+
+  // Ongoing notification oluştur
+  await AwesomeNotifications().createNotification(
+    content: NotificationContent(
+      id: 1001,
+      channelKey: 'prayer_channel',
+      title: '🕌 Namaz Vakitleri',
+      body: vakitRow,
+      notificationLayout: NotificationLayout.BigText,
+      backgroundColor: const Color(0xFF181818),
+      largeIcon: 'resource://drawable/mosque',
+      autoDismissible: false,
+      locked: true,
+      wakeUpScreen: false,
+      category: NotificationCategory.Service,
+      summary: 'Günün vakitleri',
+    ),
+  );
+}
+
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
   @override

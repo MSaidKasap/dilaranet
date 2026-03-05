@@ -7,8 +7,46 @@ import android.content.Intent
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.os.Build
+import java.util.Calendar
 
 class MainActivity : FlutterActivity() {
+        override fun onStart() {
+            super.onStart()
+            setupWidgetAlarm(this)
+        }
+
+        private fun setupWidgetAlarm(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            val widgetReceivers = listOf(
+                PrayerTimesWidgetReceiver::class.java,
+                PrayerTimesBigWidgetReceiver::class.java,
+                PrayerTimesHorizontalWidgetReceiver::class.java
+            )
+            for (receiver in widgetReceivers) {
+                val intent = Intent(context, receiver)
+                intent.action = AppWidgetManager.ACTION_APPWIDGET_UPDATE
+                val pendingIntent = PendingIntent.getBroadcast(
+                    context,
+                    receiver.name.hashCode(),
+                    intent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or if (Build.VERSION.SDK_INT >= 23) PendingIntent.FLAG_IMMUTABLE else 0
+                )
+                val calendar = Calendar.getInstance().apply {
+                    set(Calendar.SECOND, 0)
+                    set(Calendar.MILLISECOND, 0)
+                    add(Calendar.MINUTE, 1)
+                }
+                alarmManager.setRepeating(
+                    AlarmManager.RTC_WAKEUP,
+                    calendar.timeInMillis,
+                    60 * 1000L,
+                    pendingIntent
+                )
+            }
+        }
     private val CHANNEL = "net.dilara.social/widget"
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

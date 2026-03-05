@@ -13,6 +13,7 @@ import 'package:path/path.dart';
 import '../../utill/notifications.dart';
 import '../../utill/database_helper.dart';
 import 'notification_settings_page.dart';
+import '../../main.dart' show showPrayerTimesOngoingNotification;
 
 class PrayerTimesPage extends StatefulWidget {
   const PrayerTimesPage({Key? key}) : super(key: key);
@@ -28,6 +29,7 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
   String currentDate = '';
   Position? currentPosition;
   Timer? _timer;
+  Timer? _widgetUpdateTimer;
   String nextPrayerName = '';
   String timeToNextPrayer = '';
   Database? _database;
@@ -172,6 +174,67 @@ class _PrayerTimesPageState extends State<PrayerTimesPage> {
     _updateCurrentDate();
     _startTimer();
     _initOnce();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (prayerTimes != null && prayerTimes is Map<String, String>) {
+        // Şu anki vakti belirle
+        String currentPrayer = '';
+        final now = DateTime.now();
+        final vakitOrder = [
+          'Fajr',
+          'Sunrise',
+          'Dhuhr',
+          'Asr',
+          'Maghrib',
+          'Isha',
+        ];
+        for (final vakit in vakitOrder) {
+          final timeStr = (prayerTimes![vakit] ?? '').toString();
+          final parts = timeStr.split(':');
+          if (parts.length < 2) continue;
+          final hour = int.tryParse(parts[0]) ?? 0;
+          final minute = int.tryParse(parts[1]) ?? 0;
+          final vakitTime = DateTime(
+            now.year,
+            now.month,
+            now.day,
+            hour,
+            minute,
+          );
+          if (now.isBefore(vakitTime)) {
+            break;
+          }
+          currentPrayer = vakit;
+        }
+        print(
+          '[ONGOING NOTIFICATION] Tetikleniyor: currentPrayer=$currentPrayer, allTimes=${prayerTimes.toString()}',
+        );
+        await showPrayerTimesOngoingNotification(
+          currentPrayer: currentPrayer,
+          allTimes: Map<String, String>.from(prayerTimes!),
+        );
+      } else {
+        print(
+          '[ONGOING NOTIFICATION] prayerTimes null veya beklenen formatta değil: $prayerTimes',
+        );
+      }
+      // Widget'ı her dakika güncelle (uygulama açıkken)
+      _widgetUpdateTimer?.cancel();
+      _widgetUpdateTimer = Timer.periodic(const Duration(minutes: 1), (
+        timer,
+      ) async {
+        try {
+          const platform = MethodChannel('home_widget');
+          await platform.invokeMethod('updateWidget', {
+            'name': 'PrayerTimesWidgetReceiver',
+          });
+          await platform.invokeMethod('updateWidget', {
+            'name': 'PrayerTimesBigWidgetReceiver',
+          });
+        } catch (e) {
+          debugPrint('Widget güncelleme hatası: $e');
+        }
+      });
+    });
   }
 
   Future<void> _initOnce() async {

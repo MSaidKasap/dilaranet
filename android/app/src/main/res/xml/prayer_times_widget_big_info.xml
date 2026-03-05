@@ -2,7 +2,7 @@
 <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
     android:minWidth="340dp"
     android:minHeight="260dp"
-    android:updatePeriodMillis="1800000"
+    android:updatePeriodMillis="60000"
     android:initialLayout="@layout/dilara_widget_big"
     android:resizeMode="horizontal|vertical"
     android:widgetCategory="home_screen"

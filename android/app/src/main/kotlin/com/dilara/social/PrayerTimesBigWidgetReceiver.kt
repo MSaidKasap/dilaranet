@@ -2,86 +2,86 @@ package com.dilara.social
 
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
-import android.content.Intent
 import android.widget.RemoteViews
+import com.dilara.social.R
+import java.util.Calendar
 
 class PrayerTimesBigWidgetReceiver : AppWidgetProvider() {
-
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
         val prefs = context.getSharedPreferences("HomeWidget", Context.MODE_PRIVATE)
         val location = prefs.getString("widget_location", "Konum") ?: "Konum"
-        val fajr    = prefs.getString("widget_fajr",    "--:--") ?: "--:--"
+        val fajr = prefs.getString("widget_fajr", "--:--") ?: "--:--"
         val sunrise = prefs.getString("widget_sunrise", "--:--") ?: "--:--"
-        val dhuhr   = prefs.getString("widget_dhuhr",   "--:--") ?: "--:--"
-        val asr     = prefs.getString("widget_asr",     "--:--") ?: "--:--"
+        val dhuhr = prefs.getString("widget_dhuhr", "--:--") ?: "--:--"
+        val asr = prefs.getString("widget_asr", "--:--") ?: "--:--"
         val maghrib = prefs.getString("widget_maghrib", "--:--") ?: "--:--"
-        val isha    = prefs.getString("widget_isha",    "--:--") ?: "--:--"
-        val date    = prefs.getString("widget_date",    "--.--.----") ?: "--.--.----"
+        val isha = prefs.getString("widget_isha", "--:--") ?: "--:--"
+        val date = prefs.getString("widget_date", "--.--.----") ?: "--.--.----"
 
         val prayers = listOf(
-            "İmsak"  to fajr,
-            "Güneş"  to sunrise,
-            "Öğle"   to dhuhr,
+            "İmsak" to fajr,
+            "Güneş" to sunrise,
+            "Öğle" to dhuhr,
             "İkindi" to asr,
-            "Akşam"  to maghrib,
-            "Yatsı"  to isha
+            "Akşam" to maghrib,
+            "Yatsı" to isha
         )
 
-        val currentIdx = PrayerTimesWidgetReceiver.computeCurrentPrayerIndex(prayers)
-        val nextIdx   = (currentIdx + 1) % prayers.size
-        val nextName  = prayers[nextIdx].first
-        val nextTime  = prayers[nextIdx].second
-        val remaining = PrayerTimesWidgetReceiver.calculateRemaining(nextTime)
-
-        // Orijinal layout'taki id'ler
-        val labelIds = listOf(
-            R.id.widget_fajr_label,   R.id.widget_sunrise_label,
-            R.id.widget_dhuhr_label,  R.id.widget_asr_label,
-            R.id.widget_maghrib_label, R.id.widget_isha_label
-        )
-        val timeIds = listOf(
-            R.id.widget_fajr_time,   R.id.widget_sunrise_time,
-            R.id.widget_dhuhr_time,  R.id.widget_asr_time,
-            R.id.widget_maghrib_time, R.id.widget_isha_time
-        )
-        val times = listOf(fajr, sunrise, dhuhr, asr, maghrib, isha)
+        val (nextName, nextTime, nextIdx) = computeNextPrayer(prayers)
+        val remaining = calculateRemaining(nextTime)
 
         for (appWidgetId in appWidgetIds) {
             val views = RemoteViews(context.packageName, R.layout.dilara_widget_big)
-
-            views.setTextViewText(R.id.widget_location,         location)
-            views.setTextViewText(R.id.widget_date,             date)
-            views.setTextViewText(R.id.widget_next_label,       "SIRADAKİ")
+            views.setTextViewText(R.id.widget_location, location)
+            views.setTextViewText(R.id.widget_date, date)
+            views.setTextViewText(R.id.widget_next_label, "SIRADAKİ")
             views.setTextViewText(R.id.widget_next_prayer_name, nextName)
             views.setTextViewText(R.id.widget_next_prayer_time, nextTime)
-            views.setTextViewText(R.id.widget_remaining_time,   remaining)
-
-            // Vakit saatlerini yaz + aktif vakti altın renkle vurgula
-            for (i in labelIds.indices) {
-                views.setTextViewText(timeIds[i], times[i])
-                if (i == currentIdx) {
-                    views.setTextColor(labelIds[i], 0xFFFFD700.toInt())
-                    views.setTextColor(timeIds[i],  0xFFFFD700.toInt())
-                } else {
-                    views.setTextColor(labelIds[i], 0xFFB0B0B0.toInt())
-                    views.setTextColor(timeIds[i],  0xFFFFFFFF.toInt())
-                }
-            }
-
+            views.setTextViewText(R.id.widget_remaining_time, remaining)
+            // Günün tüm vakitleri
+            views.setTextViewText(R.id.widget_fajr_time, fajr)
+            views.setTextViewText(R.id.widget_sunrise_time, sunrise)
+            views.setTextViewText(R.id.widget_dhuhr_time, dhuhr)
+            views.setTextViewText(R.id.widget_asr_time, asr)
+            views.setTextViewText(R.id.widget_maghrib_time, maghrib)
+            views.setTextViewText(R.id.widget_isha_time, isha)
             appWidgetManager.updateAppWidget(appWidgetId, views)
         }
-
-        PrayerAlarmScheduler.scheduleNext(context, prayers)
     }
 
-    override fun onReceive(context: Context, intent: Intent) {
-        super.onReceive(context, intent)
-        if (intent.action == PrayerAlarmScheduler.ACTION_PRAYER_TIME_TICK) {
-            val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, PrayerTimesBigWidgetReceiver::class.java))
-            onUpdate(context, manager, ids)
+    private fun computeNextPrayer(times: List<Pair<String, String>>): Triple<String, String, Int> {
+        val now = Calendar.getInstance()
+        val nowSeconds = now.get(Calendar.HOUR_OF_DAY) * 3600 +
+            now.get(Calendar.MINUTE) * 60 +
+            now.get(Calendar.SECOND)
+        for ((idx, pair) in times.withIndex()) {
+            val (name, time) = pair
+            val parts = time.split(":").mapNotNull { it.toIntOrNull() }
+            if (parts.size < 2) continue
+            val seconds = parts[0] * 3600 + parts[1] * 60
+            if (seconds > nowSeconds) {
+                return Triple(name, time, idx)
+            }
         }
+        // If all passed, roll to next day İmsak
+        return Triple(times.first().first, times.first().second, 0)
+    }
+
+    private fun calculateRemaining(time: String): String {
+        val now = Calendar.getInstance()
+        val parts = time.split(":").mapNotNull { it.toIntOrNull() }
+        if (parts.size < 2) return "--:--"
+        val target = now.clone() as Calendar
+        target.set(Calendar.HOUR_OF_DAY, parts[0])
+        target.set(Calendar.MINUTE, parts[1])
+        target.set(Calendar.SECOND, 0)
+        if (target.before(now)) {
+            target.add(Calendar.DAY_OF_MONTH, 1)
+        }
+        val diff = (target.timeInMillis - now.timeInMillis) / 1000
+        val hours = diff / 3600
+        val minutes = (diff % 3600) / 60
+        return String.format("%02d s %02d dk", hours, minutes)
     }
 }
