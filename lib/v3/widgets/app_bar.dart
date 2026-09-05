@@ -24,7 +24,7 @@ class V3AppBar extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 6, 6, 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: V3Colors.scaffold,
         boxShadow: [
           BoxShadow(
               color: V3Colors.shadow, blurRadius: 2, offset: const Offset(0, 1)),
@@ -35,11 +35,20 @@ class V3AppBar extends StatelessWidget {
           Expanded(
             child: Align(
               alignment: Alignment.centerLeft,
-              child: Image.asset(
-                'assets/img/logo.png',
-                height: 32,
-                fit: BoxFit.contain,
-                semanticLabel: title,
+              child: Container(
+                // logo.png'nin zemini opak beyaz; koyu modda "yamalı"
+                // görünmemesi için kendi beyaz rozetinde tutuyoruz.
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Image.asset(
+                  'assets/img/logo.png',
+                  height: 28,
+                  fit: BoxFit.contain,
+                  semanticLabel: title,
+                ),
               ),
             ),
           ),
