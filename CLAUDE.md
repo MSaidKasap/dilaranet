@@ -5,6 +5,15 @@ hataları** kayıt altına tutar. Yeni bir oturuma başlarken önce bunu oku.
 
 ## İlerleme (özet, en son değişiklikler üstte)
 
+- **Xcode Cloud build kuralı:** `main`'e push, "Code push" start condition'ı
+  ile otomatik bir Xcode Cloud build'i tetikliyor ve App Store Connect'e
+  yüklüyor. `pubspec.yaml`'daki `version: X.Y.Z+N`'de **N (build numarası)
+  her push'tan önce artırılmalı** — aksi halde Apple aynı numarayı ikinci
+  kez kabul etmez ve build "Preparing build for App Store Connect failed"
+  ile başarısız olur (bunu 3 kez art arda unutup 3 başarısız build'e sebep
+  oldum). `ITSAppUsesNonExemptEncryption: false` `Info.plist`'e eklendi
+  (uygulama sadece standart HTTPS kullanıyor) — export compliance sorusu
+  bir daha çıkmamalı.
 - **Sunucu altyapısı:** `cdn.dilara.net`'in Let's Encrypt sertifikası süresi
   dolmuştu (27 Tem 2026'da bitmiş, Plesk'in içindeki bozuk/eski bir ACME
   order kaydı yüzünden otomatik yenilenememiş — bkz. "Sunucuya erişim").
