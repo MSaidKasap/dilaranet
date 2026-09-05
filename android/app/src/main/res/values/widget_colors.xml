@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Widget renk paleti -->
+    <color name="widget_bg_dark">#0D0D0D</color>
+    <color name="widget_bg_panel">#1A1A2E</color>
+    <color name="widget_gold">#FFD700</color>
+    <color name="widget_gold_dim">#CCAA00</color>
+    <color name="widget_white">#FFFFFF</color>
+    <color name="widget_white_70">#B3FFFFFF</color>
+    <color name="widget_white_50">#80FFFFFF</color>
+    <color name="widget_white_30">#4DFFFFFF</color>
+    <color name="widget_white_10">#1AFFFFFF</color>
+    <color name="widget_highlight_bg">#2AFFD700</color>
+    <color name="widget_divider">#33FFFFFF</color>
+    <color name="widget_orange">#FF8C00</color>
+</resources>

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:paddingTop="16dp"
+    android:paddingBottom="16dp"
+    android:background="@android:color/white">
+
+    <!-- Başlık: "Yatsının Çıkmasına" -->
+    <TextView
+        android:id="@+id/tv_title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:text="Yatsının Çıkmasına"
+        android:textSize="13sp"
+        android:textColor="#8A8A8E"
+        android:fontFamily="sans-serif-medium" />
+
+    <!-- Büyük sayaç: saat (statik, dakikada bir güncellenir) + dakika:saniye (canlı) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/tv_hours"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="00"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="#1C1C1E"
+            android:fontFamily="monospace" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=":"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="#1C1C1E"
+            android:fontFamily="monospace" />
+
+        <Chronometer
+            android:id="@+id/chronometer_countdown"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="34sp"
+            android:textStyle="bold"
+            android:textColor="#1C1C1E"
+            android:fontFamily="monospace" />
+    </LinearLayout>
+
+    <!-- saat / dakika / saniye etiketleri -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="2dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="saat"
+            android:textSize="11sp"
+            android:textColor="#A0A0A5" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="dakika"
+            android:textSize="11sp"
+            android:textColor="#A0A0A5" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="saniye"
+            android:textSize="11sp"
+            android:textColor="#A0A0A5" />
+    </LinearLayout>
+
+    <!-- İlerleme çubuğu -->
+    <ProgressBar
+        android:id="@+id/progress_prayer"
+        style="?android:attr/progressBarStyleHorizontal"
+        android:layout_width="match_parent"
+        android:layout_height="6dp"
+        android:layout_marginTop="14dp"
+        android:max="1000"
+        android:progressDrawable="@drawable/progress_prayer_bg"
+        android:progress="500" />
+
+</LinearLayout>

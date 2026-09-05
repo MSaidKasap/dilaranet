@@ -1,0 +1,41 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+.pub/
+build/
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/App.framework
+ios/Flutter/engine/
+ios/Flutter/Generated.xcconfig
+ios/Flutter/ephemeral/
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/app/build/
+android/app/release/
+android/local.properties
+
+# macOS
+macos/Flutter/ephemeral/
+macos/Pods/
+
+# IDE
+.idea/
+.vscode/
+.claude/
+*.iml
+
+# Logs
+*.log
+
+# macOS Finder
+.DS_Store
+
+# Veritabanı dökümü — asla commit edilmemeli (müşteri verisi içerir)
+admin_dilarayayinlari.sql
