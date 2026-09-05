@@ -238,7 +238,7 @@ class _V3QiblaPageState extends State<V3QiblaPage> {
           Text(
             'Kıble açısı: ${qibla.toStringAsFixed(0)}°'
             '${_heading != null ? '   ·   Pusula: ${heading.toStringAsFixed(0)}°' : ''}',
-            style: const TextStyle(color: V3Colors.textMuted, fontSize: 13),
+            style: TextStyle(color: V3Colors.textMuted, fontSize: 13),
           ),
           const SizedBox(height: 24),
           AspectRatio(
@@ -282,19 +282,19 @@ class _V3QiblaPageState extends State<V3QiblaPage> {
           ),
           const SizedBox(height: 20),
           if (!_hasCompass)
-            const Text(
+            Text(
               'Bu cihazda pusula sensörü yok. Kıble açısı kuzeye göre yukarıda gösteriliyor.',
               textAlign: TextAlign.center,
               style: TextStyle(color: V3Colors.textMuted, fontSize: 12),
             )
           else if (_heading == null)
-            const Text(
+            Text(
               'Pusula kalibre ediliyor. Telefonu yatay tutup havada 8 çizin.',
               textAlign: TextAlign.center,
               style: TextStyle(color: V3Colors.textMuted, fontSize: 12),
             )
           else
-            const Text(
+            Text(
               'Oku yukarı (ekranın üstüne) getirene kadar dönün.',
               textAlign: TextAlign.center,
               style: TextStyle(color: V3Colors.textMuted, fontSize: 12),
@@ -382,7 +382,7 @@ class _Message extends StatelessWidget {
             const SizedBox(height: 16),
             Text(text,
                 textAlign: TextAlign.center,
-                style: const TextStyle(color: V3Colors.textMuted)),
+                style: TextStyle(color: V3Colors.textMuted)),
             if (action != null) ...[const SizedBox(height: 12), action!],
           ],
         ),

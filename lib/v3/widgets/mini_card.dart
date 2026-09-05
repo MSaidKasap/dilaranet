@@ -55,7 +55,7 @@ class V3MiniCard extends StatelessWidget {
                     post.excerpt,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(color: V3Colors.textMuted, height: 1.4),
+                    style: TextStyle(color: V3Colors.textMuted, height: 1.4),
                   ),
                   const SizedBox(height: 8),
                   Row(
@@ -64,12 +64,12 @@ class V3MiniCard extends StatelessWidget {
                         child: Text(
                           post.relativeTime,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                               fontSize: 13, color: V3Colors.textMuted),
                         ),
                       ),
                       if ((categoryLabel ?? '').isNotEmpty) ...[
-                        const Text(' | ',
+                        Text(' | ',
                             style: TextStyle(
                                 fontSize: 13, color: V3Colors.textMuted)),
                         Flexible(

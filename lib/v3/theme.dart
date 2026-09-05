@@ -5,15 +5,32 @@ import 'package:google_fonts/google_fonts.dart';
 ///
 /// Kaynak: OLayemii/flutter-ui-kits -> news_ui (utils/constants.dart)
 /// Modern Flutter'a uyarlandı, eski `lib/core` yapısına dokunulmadı.
+/// Uygulama genelinde kullanılan renkler. Sabit yerine getter olmalarının
+/// nedeni: `ThemeMode.system` ile eşlenecek şekilde platform karanlık
+/// moddaysa otomatik olarak koyu paleti döndürsünler — `V3Theme.dark()`'ın
+/// arka plan/yüzey renkleriyle aynı değerleri paylaşırlar.
 class V3Colors {
-  // dilara.net logosundaki mavi.
+  // dilara.net logosundaki mavi — açık/koyu modda aynı.
   static const Color primary = Color(0xFF1D55A9);
-  static const Color scaffold = Colors.white;
-  static const Color surface = Color.fromRGBO(245, 246, 250, 1);
-  static const Color border = Color.fromRGBO(233, 233, 233, 1);
-  static const Color textPrimary = Color.fromRGBO(28, 28, 28, 1);
-  static const Color textMuted = Color.fromRGBO(139, 144, 165, 1);
-  static const Color shadow = Color.fromRGBO(169, 176, 185, 0.42);
+
+  static const Color darkBackground = Color(0xFF121212);
+  static const Color darkSurface = Color(0xFF1C1C1E);
+
+  static bool get _isDark =>
+      WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+      Brightness.dark;
+
+  static Color get scaffold => _isDark ? darkBackground : Colors.white;
+  static Color get surface =>
+      _isDark ? darkSurface : const Color.fromRGBO(245, 246, 250, 1);
+  static Color get border =>
+      _isDark ? const Color(0xFF38383A) : const Color.fromRGBO(233, 233, 233, 1);
+  static Color get textPrimary =>
+      _isDark ? const Color(0xFFF2F2F7) : const Color.fromRGBO(28, 28, 28, 1);
+  static Color get textMuted =>
+      _isDark ? const Color(0xFF9A9AA1) : const Color.fromRGBO(139, 144, 165, 1);
+  static Color get shadow =>
+      _isDark ? Colors.black54 : const Color.fromRGBO(169, 176, 185, 0.42);
 }
 
 class V3Theme {
@@ -35,7 +52,7 @@ class V3Theme {
         bodyColor: V3Colors.textPrimary,
         displayColor: V3Colors.textPrimary,
       ),
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         backgroundColor: Colors.white,
         foregroundColor: V3Colors.textPrimary,
         elevation: 0,
@@ -54,8 +71,8 @@ class V3Theme {
   /// kenarlık renkleri koyu modda da açık kalabilir — `Scaffold`/`AppBar`
   /// arka planı ve varsayılan metin/simge renkleri doğru şekilde koyulaşır.
   static ThemeData dark() {
-    const background = Color(0xFF121212);
-    const surface = Color(0xFF1C1C1E);
+    const background = V3Colors.darkBackground;
+    const surface = V3Colors.darkSurface;
 
     final base = ThemeData(
       useMaterial3: true,

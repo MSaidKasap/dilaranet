@@ -51,7 +51,7 @@ class V3GalleryPage extends StatelessWidget {
               title: Text(item.title,
                   style: const TextStyle(fontWeight: FontWeight.w600)),
               trailing:
-                  const Icon(Icons.chevron_right, color: V3Colors.textMuted),
+                  Icon(Icons.chevron_right, color: V3Colors.textMuted),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => V3PostsListPage(

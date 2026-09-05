@@ -5,14 +5,35 @@ hataları** kayıt altına tutar. Yeni bir oturuma başlarken önce bunu oku.
 
 ## İlerleme (özet, en son değişiklikler üstte)
 
-- Sisteme bağlı karanlık tema eklendi: `V3Theme.dark()` +
-  `MaterialApp(themeMode: ThemeMode.system)`. Tüm `Scaffold`'lardaki sabit
-  `backgroundColor: Colors.white` kaldırıldı (artık temadan geliyor).
-  **Bilinen eksik:** `V3Colors` (surface/border/textMuted/shadow) hâlâ sabit
-  açık-tema renkleri — kart/kenarlık gibi bunlara dayanan öğeler koyu modda
-  hâlâ açık görünebilir. Tam düzeltme `V3Colors`'ı ~37 dosyada/197 kullanım
-  yerinde temaya duyarlı hale getirmeyi gerektirir (bilinçli olarak
-  ertelendi, kullanıcı onayı gerekir).
+- **Sunucu altyapısı:** `cdn.dilara.net`'in Let's Encrypt sertifikası süresi
+  dolmuştu (27 Tem 2026'da bitmiş, Plesk'in içindeki bozuk/eski bir ACME
+  order kaydı yüzünden otomatik yenilenememiş — bkz. "Sunucuya erişim").
+  `/opt/psa/var/modules/letsencrypt/orders/` altındaki ilgili stale order
+  JSON'u yedeklenip silindi, `plesk bin extension --exec letsencrypt
+  cli.php -d cdn.dilara.net -m ...` ile yeniden verildi ve doğrulandı. Bu,
+  indirme ekranındaki "CERTIFICATE_VERIFY_FAILED" hatasının kök nedeniydi.
+  **Ders:** Bu hatayı görürsen önce `openssl s_client -connect
+  <host>:443 -servername <host>` ile sertifika `notAfter` tarihini kontrol
+  et — uygulama kodunda arama, çoğunlukla sertifika/altyapı sorunudur.
+- **iOS/Android ana ekran widget'ı** (namaz vakitleri) v3'e hiç
+  taşınmamıştı: v2 (`lib/core/pages/prayer_times_page.dart`) her vakit
+  yüklendiğinde `net.dilara.social/widget` MethodChannel'ı ile
+  `savePrayerTimes` çağırıp App Group/SharedPreferences'a yazıyor ve
+  `WidgetCenter.reloadAllTimelines()` tetikliyordu; v3'ün
+  `V3PrayerRepository`si bunu hiç çağırmıyordu. `_syncWidget()` olarak
+  `lib/v3/data/prayer.dart`'a taşındı, `load()` içinde (hem cache hem taze
+  veri yolunda) çağrılıyor.
+- Karanlık tema tam olarak çalışıyor: `V3Theme.dark()` +
+  `MaterialApp(themeMode: ThemeMode.system)`. `V3Colors` (`theme.dart`)
+  artık `static const` değil, `WidgetsBinding...platformBrightness`'a göre
+  açık/koyu döndüren **getter**'lar (`scaffold`, `surface`, `border`,
+  `textPrimary`, `textMuted`, `shadow`) — `primary` marka rengi olduğu için
+  sabit kaldı. Bu değişiklik ~37 dosyada `const TextStyle/Icon/BoxDecoration`
+  gibi yerlerin çoğunun `const` anahtar kelimesini kaybetmesini gerektirdi
+  (derleyicinin `invalid_constant` hatalarını tek tek takip ederek
+  düzeltildi — bkz. `git log`). **Yeni bir widget yazarken:** `V3Colors.xxx`
+  (primary hariç) bir `const` ifadenin içinde kullanılamaz; o widget/stil
+  çağrısından `const` kaldırılmalı.
 - Namaz bildirimi ayarları v2'deki gibi ayrıntılı hale getirildi: yeni
   `lib/v3/pages/prayer_notification_settings_page.dart` (genel aç/kapa,
   önce/sonra süre presetleri, vakit başına aç/kapa + sessiz bildirim).

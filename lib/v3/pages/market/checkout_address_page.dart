@@ -83,7 +83,7 @@ class _CheckoutAddressPageState extends State<CheckoutAddressPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('Adresler yüklenemedi.',
+                      Text('Adresler yüklenemedi.',
                           style: TextStyle(color: V3Colors.textMuted)),
                       const SizedBox(height: 12),
                       FilledButton(
@@ -102,7 +102,7 @@ class _CheckoutAddressPageState extends State<CheckoutAddressPage> {
               padding: const EdgeInsets.all(20),
               children: [
                 if (address == null) ...[
-                  const Text(
+                  Text(
                     'Henüz bir teslimat & fatura adresi eklemediniz.',
                     style: TextStyle(color: V3Colors.textMuted),
                   ),

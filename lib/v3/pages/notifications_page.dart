@@ -73,7 +73,7 @@ class _V3NotificationsPageState extends State<V3NotificationsPage> {
                 SwitchListTile(
                   activeThumbColor: V3Colors.primary,
                   title: const Text('Namaz vakti bildirimleri'),
-                  subtitle: const Text('Her vakitten önce hatırlat',
+                  subtitle: Text('Her vakitten önce hatırlat',
                       style:
                           TextStyle(fontSize: 12, color: V3Colors.textMuted)),
                   value: _prayerNotif,
@@ -81,13 +81,13 @@ class _V3NotificationsPageState extends State<V3NotificationsPage> {
                 ),
                 const Divider(height: 1),
                 ListTile(
-                  leading: const Icon(Icons.tune_rounded,
+                  leading: Icon(Icons.tune_rounded,
                       color: V3Colors.textPrimary),
                   title: const Text('Vakit Başına Ayarlar'),
-                  subtitle: const Text(
+                  subtitle: Text(
                       'Süre, sessiz bildirim ve vakit bazlı açma/kapama',
                       style: TextStyle(fontSize: 12, color: V3Colors.textMuted)),
-                  trailing: const Icon(Icons.chevron_right,
+                  trailing: Icon(Icons.chevron_right,
                       color: V3Colors.textMuted),
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
@@ -114,7 +114,7 @@ class _V3NotificationsPageState extends State<V3NotificationsPage> {
               }
               final posts = snapshot.data ?? const [];
               if (posts.isEmpty) {
-                return const Text('Şu an gösterilecek bir şey yok.',
+                return Text('Şu an gösterilecek bir şey yok.',
                     style: TextStyle(color: V3Colors.textMuted));
               }
               return Column(

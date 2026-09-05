@@ -113,11 +113,11 @@ class _V3PrayerPageState extends State<V3PrayerPage> {
         children: [
           Row(
             children: [
-              const Icon(Icons.place_outlined, size: 18, color: V3Colors.textMuted),
+              Icon(Icons.place_outlined, size: 18, color: V3Colors.textMuted),
               const SizedBox(width: 6),
               Expanded(
                 child: Text(data.locationName,
-                    style: const TextStyle(color: V3Colors.textMuted)),
+                    style: TextStyle(color: V3Colors.textMuted)),
               ),
             ],
           ),
@@ -130,12 +130,12 @@ class _V3PrayerPageState extends State<V3PrayerPage> {
             contentPadding: EdgeInsets.zero,
             activeThumbColor: V3Colors.primary,
             title: const Text('Namaz vakti bildirimleri'),
-            subtitle: const Text('Her vakitten önce hatırlat',
+            subtitle: Text('Her vakitten önce hatırlat',
                 style: TextStyle(fontSize: 12, color: V3Colors.textMuted)),
             value: _notif,
             onChanged: _toggleNotif,
             secondary: IconButton(
-              icon: const Icon(Icons.tune_rounded, color: V3Colors.textMuted),
+              icon: Icon(Icons.tune_rounded, color: V3Colors.textMuted),
               tooltip: 'Vakit başına ayarlar',
               onPressed: () => Navigator.of(context).push(
                 MaterialPageRoute(
@@ -243,11 +243,11 @@ class _ErrorView extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       children: [
         SizedBox(height: MediaQuery.of(context).size.height * 0.18),
-        const Icon(Icons.location_off_outlined, size: 48, color: V3Colors.textMuted),
+        Icon(Icons.location_off_outlined, size: 48, color: V3Colors.textMuted),
         const SizedBox(height: 12),
         Text(message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: V3Colors.textMuted)),
+            style: TextStyle(color: V3Colors.textMuted)),
         const SizedBox(height: 16),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

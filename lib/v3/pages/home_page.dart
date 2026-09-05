@@ -98,7 +98,7 @@ class _V3HomePageState extends State<V3HomePage> {
         }
         final posts = (snapshot.data ?? const []).take(6).toList();
         if (posts.isEmpty) {
-          return const SizedBox(
+          return SizedBox(
             height: 120,
             child: Center(
               child: Text('İçerik yüklenemedi. Bağlantınızı kontrol edin.',
@@ -274,8 +274,8 @@ class _V3HomePageState extends State<V3HomePage> {
         }
         final posts = snapshot.data ?? const [];
         if (posts.isEmpty) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32),
             child: Center(
                 child: Text('İçerik bulunamadı.',
                     style: TextStyle(color: V3Colors.textMuted))),

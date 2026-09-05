@@ -55,7 +55,7 @@ class _V3SearchPageState extends State<V3SearchPage> {
             ),
             child: Row(
               children: [
-                const Icon(Icons.search, color: V3Colors.textMuted),
+                Icon(Icons.search, color: V3Colors.textMuted),
                 const SizedBox(width: 10),
                 Expanded(
                   child: TextField(
@@ -78,7 +78,7 @@ class _V3SearchPageState extends State<V3SearchPage> {
         ),
         Expanded(
           child: _future == null
-              ? const Center(
+              ? Center(
                   child: Text('Bir kelime yazıp arayın.',
                       style: TextStyle(color: V3Colors.textMuted)),
                 )
@@ -95,7 +95,7 @@ class _V3SearchPageState extends State<V3SearchPage> {
                     if (posts.isEmpty) {
                       return Center(
                         child: Text('"$_lastQuery" için sonuç bulunamadı.',
-                            style: const TextStyle(color: V3Colors.textMuted)),
+                            style: TextStyle(color: V3Colors.textMuted)),
                       );
                     }
                     return ListView.separated(

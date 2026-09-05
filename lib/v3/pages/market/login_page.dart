@@ -59,7 +59,7 @@ class _MarketLoginPageState extends State<MarketLoginPage> {
           child: ListView(
             padding: const EdgeInsets.all(20),
             children: [
-              const Text('Dilara Yayınları hesabınızla giriş yapın',
+              Text('Dilara Yayınları hesabınızla giriş yapın',
                   style: TextStyle(fontSize: 16, color: V3Colors.textMuted)),
               const SizedBox(height: 24),
               TextFormField(

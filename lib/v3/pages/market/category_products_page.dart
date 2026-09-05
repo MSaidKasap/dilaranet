@@ -62,7 +62,7 @@ class _CategoryProductsPageState extends State<CategoryProductsPage> {
       body: !_initialLoadDone
           ? const Center(child: CircularProgressIndicator(color: V3Colors.primary))
           : _products.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text('Ürün bulunamadı.',
                       style: TextStyle(color: V3Colors.textMuted)))
               : NotificationListener<ScrollNotification>(

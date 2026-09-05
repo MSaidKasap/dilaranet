@@ -34,9 +34,9 @@ class _MarketOrderDetailPageState extends State<MarketOrderDetailPage> {
                 child: CircularProgressIndicator(color: V3Colors.primary));
           }
           if (!snapshot.hasData) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Text(
                   'Sipariş bulunamadı. Ödemeniz henüz onaylanmamış olabilir; '
                   'birkaç dakika içinde "Siparişlerim" bölümünden tekrar kontrol edin.',
@@ -63,10 +63,10 @@ class _MarketOrderDetailPageState extends State<MarketOrderDetailPage> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(order.date,
-                            style: const TextStyle(color: V3Colors.textMuted)),
+                            style: TextStyle(color: V3Colors.textMuted)),
                         const SizedBox(height: 4),
                         Text(order.shippingAddress,
-                            style: const TextStyle(color: V3Colors.textMuted)),
+                            style: TextStyle(color: V3Colors.textMuted)),
                       ],
                     ),
                     Container(
@@ -107,7 +107,7 @@ class _MarketOrderDetailPageState extends State<MarketOrderDetailPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(t.title, style: const TextStyle(color: V3Colors.textMuted)),
+                      Text(t.title, style: TextStyle(color: V3Colors.textMuted)),
                       Text(t.text, style: const TextStyle(fontWeight: FontWeight.w600)),
                     ],
                   ),
@@ -124,7 +124,7 @@ class _MarketOrderDetailPageState extends State<MarketOrderDetailPage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(h.status),
-                        Text(h.date, style: const TextStyle(color: V3Colors.textMuted)),
+                        Text(h.date, style: TextStyle(color: V3Colors.textMuted)),
                       ],
                     ),
                   ),

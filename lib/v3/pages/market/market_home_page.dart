@@ -62,7 +62,7 @@ class _MarketHomePageState extends State<MarketHomePage> {
             ],
           ),
           const SizedBox(height: 4),
-          const Text('Dilara Yayınları kitapları',
+          Text('Dilara Yayınları kitapları',
               style: TextStyle(color: V3Colors.textMuted)),
           const SizedBox(height: 16),
           FutureBuilder<List<MarketCategory>>(
@@ -118,8 +118,8 @@ class _MarketHomePageState extends State<MarketHomePage> {
               }
               final products = snapshot.data?.products ?? const [];
               if (products.isEmpty) {
-                return const Padding(
-                  padding: EdgeInsets.only(top: 24),
+                return Padding(
+                  padding: const EdgeInsets.only(top: 24),
                   child: Center(
                     child: Text('Ürünler yüklenemedi.',
                         style: TextStyle(color: V3Colors.textMuted)),

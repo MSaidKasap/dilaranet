@@ -34,7 +34,7 @@ class _MarketOrderHistoryPageState extends State<MarketOrderHistoryPage> {
           }
           final orders = snapshot.data ?? const [];
           if (orders.isEmpty) {
-            return const Center(
+            return Center(
               child: Text('Henüz siparişiniz yok.',
                   style: TextStyle(color: V3Colors.textMuted)),
             );

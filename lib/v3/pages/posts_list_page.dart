@@ -64,7 +64,7 @@ class V3PostsListPage extends StatelessWidget {
           child: Text(
             message,
             textAlign: TextAlign.center,
-            style: const TextStyle(color: V3Colors.textMuted),
+            style: TextStyle(color: V3Colors.textMuted),
           ),
         ),
       );

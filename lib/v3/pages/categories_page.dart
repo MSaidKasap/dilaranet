@@ -70,8 +70,8 @@ class _V3CategoriesPageState extends State<V3CategoriesPage> {
             ),
             const SizedBox(height: 20),
             if (categories.isEmpty)
-              const Padding(
-                padding: EdgeInsets.only(top: 40),
+              Padding(
+                padding: const EdgeInsets.only(top: 40),
                 child: Center(
                   child: Text('Kategoriler yüklenemedi.',
                       style: TextStyle(color: V3Colors.textMuted)),

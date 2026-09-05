@@ -23,11 +23,11 @@ class V3AppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 6, 6, 10),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
           BoxShadow(
-              color: V3Colors.shadow, blurRadius: 2, offset: Offset(0, 1)),
+              color: V3Colors.shadow, blurRadius: 2, offset: const Offset(0, 1)),
         ],
       ),
       child: Row(
@@ -55,7 +55,7 @@ class V3AppBar extends StatelessWidget {
               icon: const Icon(Icons.notifications_none_rounded, size: 24),
               color: V3Colors.textPrimary,
             ),
-          if (showCart) const V3CartIconButton(),
+          if (showCart) V3CartIconButton(),
         ],
       ),
     );

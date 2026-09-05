@@ -50,7 +50,7 @@ class _MarketSearchPageState extends State<MarketSearchPage> {
               ),
               child: Row(
                 children: [
-                  const Icon(Icons.search, color: V3Colors.textMuted),
+                  Icon(Icons.search, color: V3Colors.textMuted),
                   const SizedBox(width: 10),
                   Expanded(
                     child: TextField(
@@ -73,7 +73,7 @@ class _MarketSearchPageState extends State<MarketSearchPage> {
           ),
           Expanded(
             child: _future == null
-                ? const Center(
+                ? Center(
                     child: Text('Bir kitap adı yazıp arayın.',
                         style: TextStyle(color: V3Colors.textMuted)),
                   )
@@ -89,7 +89,7 @@ class _MarketSearchPageState extends State<MarketSearchPage> {
                       if (products.isEmpty) {
                         return Center(
                           child: Text('"$_lastQuery" için sonuç bulunamadı.',
-                              style: const TextStyle(color: V3Colors.textMuted)),
+                              style: TextStyle(color: V3Colors.textMuted)),
                         );
                       }
                       return GridView.builder(

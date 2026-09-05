@@ -46,7 +46,7 @@ class MarketProductCard extends StatelessWidget {
                   const SizedBox(height: 6),
                   if (product.special != null) ...[
                     Text(product.price,
-                        style: const TextStyle(
+                        style: TextStyle(
                             fontSize: 12,
                             decoration: TextDecoration.lineThrough,
                             color: V3Colors.textMuted)),

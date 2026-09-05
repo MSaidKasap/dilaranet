@@ -43,10 +43,10 @@ class V3HeroCard extends StatelessWidget {
           Row(
             children: [
               Text(post.relativeTime,
-                  style: const TextStyle(
+                  style: TextStyle(
                       fontSize: 14, color: V3Colors.textMuted)),
               if ((categoryLabel ?? '').isNotEmpty) ...[
-                const Text(' | ',
+                Text(' | ',
                     style: TextStyle(fontSize: 14, color: V3Colors.textMuted)),
                 Text(
                   categoryLabel!,

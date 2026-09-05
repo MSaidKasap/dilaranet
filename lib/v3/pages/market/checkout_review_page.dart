@@ -84,9 +84,9 @@ class _CheckoutReviewPageState extends State<CheckoutReviewPage> {
           }
           final quotes = snapshot.data ?? const [];
           if (quotes.isEmpty) {
-            return const Center(
+            return Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: const EdgeInsets.all(24),
                 child: Text(
                     'Bu adrese uygun bir kargo seçeneği bulunamadı. Lütfen adresinizi kontrol edin.',
                     textAlign: TextAlign.center,

@@ -100,10 +100,10 @@ class _V3ArticlePageState extends State<V3ArticlePage> {
   Widget _header(V3Post? post) {
     return Container(
       padding: const EdgeInsets.fromLTRB(8, 8, 12, 12),
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
-          BoxShadow(color: V3Colors.shadow, blurRadius: 2, offset: Offset(0, 1)),
+          BoxShadow(color: V3Colors.shadow, blurRadius: 2, offset: const Offset(0, 1)),
         ],
       ),
       child: Row(
@@ -153,9 +153,9 @@ class _V3ArticlePageState extends State<V3ArticlePage> {
           Row(
             children: [
               Text(post.relativeTime,
-                  style: const TextStyle(color: V3Colors.textMuted, fontSize: 13)),
+                  style: TextStyle(color: V3Colors.textMuted, fontSize: 13)),
               if ((label ?? '').isNotEmpty) ...[
-                const Text('  ·  ',
+                Text('  ·  ',
                     style: TextStyle(color: V3Colors.textMuted, fontSize: 13)),
                 Text(label!,
                     style: const TextStyle(

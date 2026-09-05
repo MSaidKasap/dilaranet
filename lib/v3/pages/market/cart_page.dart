@@ -74,12 +74,12 @@ class _MarketCartPageState extends State<MarketCartPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Sepet yüklenemedi.',
+                    Text('Sepet yüklenemedi.',
                         style: TextStyle(color: V3Colors.textMuted)),
                     const SizedBox(height: 4),
                     Text('${snapshot.error}',
                         textAlign: TextAlign.center,
-                        style: const TextStyle(
+                        style: TextStyle(
                             color: V3Colors.textMuted, fontSize: 12)),
                     const SizedBox(height: 12),
                     FilledButton(
@@ -95,7 +95,7 @@ class _MarketCartPageState extends State<MarketCartPage> {
           }
           final cart = snapshot.data;
           if (cart == null || cart.isEmpty) {
-            return const Center(
+            return Center(
               child: Text('Sepetiniz boş.',
                   style: TextStyle(color: V3Colors.textMuted)),
             );
@@ -119,7 +119,7 @@ class _MarketCartPageState extends State<MarketCartPage> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Text(total.title,
-                          style: const TextStyle(color: V3Colors.textMuted)),
+                          style: TextStyle(color: V3Colors.textMuted)),
                       Text(total.text,
                           style: const TextStyle(fontWeight: FontWeight.w600)),
                     ],

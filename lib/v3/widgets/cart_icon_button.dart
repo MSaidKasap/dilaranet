@@ -7,12 +7,12 @@ import '../theme.dart';
 /// Sepete giden ve içindeki ürün adedini bildirim gibi kırmızı bir
 /// rozette gösteren simge. `MarketApi.instance.cartCount`'u dinler.
 class V3CartIconButton extends StatelessWidget {
-  final Color color;
+  final Color? color;
   final double size;
 
   const V3CartIconButton({
     super.key,
-    this.color = V3Colors.textPrimary,
+    this.color,
     this.size = 24,
   });
 
@@ -26,7 +26,8 @@ class V3CartIconButton extends StatelessWidget {
             isLabelVisible: count > 0,
             backgroundColor: Colors.red,
             label: Text(count > 99 ? '99+' : '$count'),
-            child: Icon(Icons.shopping_cart_outlined, size: size, color: color),
+            child: Icon(Icons.shopping_cart_outlined,
+                size: size, color: color ?? V3Colors.textPrimary),
           ),
           onPressed: () => Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const MarketCartPage()),

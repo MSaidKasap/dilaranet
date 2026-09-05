@@ -58,7 +58,7 @@ class _MarketProductDetailPageState extends State<MarketProductDetailPage> {
                 child: CircularProgressIndicator(color: V3Colors.primary));
           }
           if (!snapshot.hasData) {
-            return const Center(
+            return Center(
                 child: Text('Ürün yüklenemedi.',
                     style: TextStyle(color: V3Colors.textMuted)));
           }
@@ -89,7 +89,7 @@ class _MarketProductDetailPageState extends State<MarketProductDetailPage> {
                 children: [
                   if (product.special != null) ...[
                     Text(product.price,
-                        style: const TextStyle(
+                        style: TextStyle(
                             decoration: TextDecoration.lineThrough,
                             color: V3Colors.textMuted)),
                     const SizedBox(width: 8),
@@ -136,7 +136,7 @@ class _MarketProductDetailPageState extends State<MarketProductDetailPage> {
                 Padding(
                   padding: const EdgeInsets.only(bottom: 8),
                   child: Text(_message!,
-                      style: const TextStyle(color: V3Colors.textMuted)),
+                      style: TextStyle(color: V3Colors.textMuted)),
                 ),
               FilledButton.icon(
                 onPressed: _adding ? null : _addToCart,

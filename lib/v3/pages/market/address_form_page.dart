@@ -114,7 +114,7 @@ class _AddressFormPageState extends State<AddressFormPage> {
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      const Text('Şehir listesi yüklenemedi.',
+                      Text('Şehir listesi yüklenemedi.',
                           style: TextStyle(color: V3Colors.textMuted)),
                       const SizedBox(height: 12),
                       FilledButton(

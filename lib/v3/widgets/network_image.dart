@@ -24,7 +24,7 @@ class V3NetworkImage extends StatelessWidget {
       height: height,
       color: V3Colors.surface,
       alignment: Alignment.center,
-      child: const Icon(Icons.image_not_supported_outlined,
+      child: Icon(Icons.image_not_supported_outlined,
           color: V3Colors.textMuted, size: 32),
     );
 

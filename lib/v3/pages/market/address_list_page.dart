@@ -88,7 +88,7 @@ class _AddressListPageState extends State<AddressListPage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text('Adresler yüklenemedi.',
+                    Text('Adresler yüklenemedi.',
                         style: TextStyle(color: V3Colors.textMuted)),
                     const SizedBox(height: 12),
                     FilledButton(
@@ -104,7 +104,7 @@ class _AddressListPageState extends State<AddressListPage> {
           }
           final addresses = snapshot.data ?? const [];
           if (addresses.isEmpty) {
-            return const Center(
+            return Center(
               child: Text('Henüz bir adres eklemediniz.',
                   style: TextStyle(color: V3Colors.textMuted)),
             );

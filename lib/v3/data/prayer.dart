@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -62,12 +63,17 @@ class V3PrayerRepository {
   static final _notifications = NotificationService();
 
   /// Konum al → vakitleri çek (7 gün) → önbelleğe yaz → bugünü döndür.
+  /// Her çağrıda iOS/Android ana ekran widget'ını da günceller (bkz.
+  /// `_syncWidget` — v2'de vardı, v3'e taşınmamıştı).
   static Future<V3PrayerTimes> load({bool forceRefresh = false}) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (!forceRefresh) {
       final cached = _readCache(prefs, DateTime.now());
-      if (cached != null) return cached;
+      if (cached != null) {
+        await _syncWidget(cached);
+        return cached;
+      }
     }
 
     final pos = await _position();
@@ -85,10 +91,34 @@ class V3PrayerRepository {
     await prefs.setString('v3_prayer_cache', json.encode(map));
 
     final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    return week.firstWhere(
+    final today = week.firstWhere(
       (d) => DateFormat('yyyy-MM-dd').format(d.date) == todayKey,
       orElse: () => week.first,
     );
+    await _syncWidget(today);
+    return today;
+  }
+
+  // ---- Ana ekran widget'ı (iOS App Group + Android SharedPreferences) ----
+
+  static const _widgetChannel = MethodChannel('net.dilara.social/widget');
+
+  static Future<void> _syncWidget(V3PrayerTimes day) async {
+    try {
+      await _widgetChannel.invokeMethod('savePrayerTimes', {
+        'fajr': day.times['Fajr'] ?? '',
+        'sunrise': day.times['Sunrise'] ?? '',
+        'dhuhr': day.times['Dhuhr'] ?? '',
+        'asr': day.times['Asr'] ?? '',
+        'maghrib': day.times['Maghrib'] ?? '',
+        'isha': day.times['Isha'] ?? '',
+        'location': day.locationName,
+        'date': DateFormat('dd.MM.yyyy').format(DateTime.now()),
+      });
+    } catch (_) {
+      // Widget güncellenemedi (ör. kanal native tarafta hazır değil):
+      // uygulamanın kendi akışını bozmasın.
+    }
   }
 
   static V3PrayerTimes? _readCache(SharedPreferences prefs, DateTime day) {

@@ -109,7 +109,7 @@ class _V3PrayerNotificationSettingsPageState
                   child: SwitchListTile(
                     activeThumbColor: V3Colors.primary,
                     title: const Text('Namaz vakti bildirimleri'),
-                    subtitle: const Text('Tüm vakit bildirimlerini aç/kapat',
+                    subtitle: Text('Tüm vakit bildirimlerini aç/kapat',
                         style:
                             TextStyle(fontSize: 12, color: V3Colors.textMuted)),
                     value: _masterEnabled,
@@ -132,7 +132,7 @@ class _V3PrayerNotificationSettingsPageState
                         Text(
                           'Namaz vaktinden $_offsetMinutes dk '
                           '${_offsetIsBefore ? "önce" : "sonra"} bildirim gönderilir.',
-                          style: const TextStyle(
+                          style: TextStyle(
                               color: V3Colors.textMuted, fontSize: 13),
                         ),
                         const SizedBox(height: 12),
@@ -200,7 +200,7 @@ class _V3PrayerNotificationSettingsPageState
                                     activeThumbColor: V3Colors.textMuted,
                                     title: const Text('Sessiz bildirim',
                                         style: TextStyle(fontSize: 13)),
-                                    subtitle: const Text(
+                                    subtitle: Text(
                                         'Sadece bildirim gelir, ses çalmaz',
                                         style: TextStyle(
                                             fontSize: 11,

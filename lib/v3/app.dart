@@ -117,7 +117,7 @@ class _V3SplashState extends State<V3Splash> {
             const SizedBox(height: 12),
             Text(
               'Kitaplar hazırlanıyor... %${(_progress * 100).round()}',
-              style: const TextStyle(color: V3Colors.textMuted, fontSize: 13),
+              style: TextStyle(color: V3Colors.textMuted, fontSize: 13),
             ),
           ],
         ),

@@ -59,10 +59,10 @@ class _V3BookmarksPageState extends State<V3BookmarksPage> {
             return ListView(
               children: [
                 SizedBox(height: MediaQuery.of(context).size.height * 0.3),
-                const Icon(Icons.bookmark_border,
+                Icon(Icons.bookmark_border,
                     size: 48, color: V3Colors.textMuted),
                 const SizedBox(height: 12),
-                const Center(
+                Center(
                   child: Text('Henüz kaydedilmiş yazı yok.',
                       style: TextStyle(color: V3Colors.textMuted)),
                 ),

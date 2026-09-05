@@ -56,11 +56,11 @@ class V3ProfilePage extends StatelessWidget {
                   Container(
                     width: 84,
                     height: 84,
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       color: V3Colors.surface,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.person_outline,
+                    child: Icon(Icons.person_outline,
                         size: 40, color: V3Colors.textMuted),
                   ),
                   const SizedBox(height: 12),
@@ -69,7 +69,7 @@ class V3ProfilePage extends StatelessWidget {
                           fontSize: 20, fontWeight: FontWeight.w700)),
                   const SizedBox(height: 4),
                   Text(customer?.email ?? 'dilara.net',
-                      style: const TextStyle(color: V3Colors.textMuted)),
+                      style: TextStyle(color: V3Colors.textMuted)),
                 ],
               ),
             );
@@ -183,7 +183,7 @@ class V3ProfilePage extends StatelessWidget {
   Widget _section(String label) => Padding(
         padding: const EdgeInsets.only(left: 4, bottom: 4, top: 4),
         child: Text(label,
-            style: const TextStyle(
+            style: TextStyle(
                 color: V3Colors.textMuted,
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
@@ -195,7 +195,7 @@ class V3ProfilePage extends StatelessWidget {
       contentPadding: EdgeInsets.zero,
       leading: Icon(icon, color: V3Colors.textPrimary),
       title: Text(label),
-      trailing: const Icon(Icons.chevron_right, color: V3Colors.textMuted),
+      trailing: Icon(Icons.chevron_right, color: V3Colors.textMuted),
       onTap: onTap,
     );
   }
