@@ -5,6 +5,25 @@ hataları** kayıt altına tutar. Yeni bir oturuma başlarken önce bunu oku.
 
 ## İlerleme (özet, en son değişiklikler üstte)
 
+- **"Preparing build for App Store Connect failed" — 2. kök neden (5 Eyl
+  2026):** Bu sefer build numarası değil, **widget extension'ın sürüm
+  uyuşmazlığıydı.** `DilaraWidgetExtension` target'ı `project.pbxproj`'de
+  `CURRENT_PROJECT_VERSION = 1` ve `MARKETING_VERSION = 1.0` sabit
+  değerleriyle kalmıştı; ana uygulama ise `$(FLUTTER_BUILD_NUMBER)` (=5) ve
+  `2.4` kullanıyor. Archive logunda (`aa.log`) `ValidateEmbeddedBinary`
+  adımı şu **uyarıyı** veriyordu: *"The CFBundleVersion of an app extension
+  ('1') must match that of its containing parent app ('5')."* Xcode Cloud
+  bunu archive'da sadece uyarı olarak geçiyor ama App Store Connect'in
+  "Prepare Build" adımı bunu **sert reddediyor** ve log'da ayrıntı
+  göstermeden "Preparing build ... failed" diyor (gerçek ITMS hatası
+  e-posta/App Store Connect'te). **Çözüm:** widget target'ının 3
+  konfigürasyonuna (Debug/Release/Profile) `baseConfigurationReference =
+  Generated.xcconfig` eklendi, `CURRENT_PROJECT_VERSION =
+  "$(FLUTTER_BUILD_NUMBER)"` ve `MARKETING_VERSION = 2.4` yapıldı — böylece
+  widget, sürümü ana uygulamayla **aynı kaynaktan** okuyor, bir daha
+  kayamaz. **Ders:** Bu hatada önce `aa.log` içinde
+  `ValidateEmbeddedBinary` / `CFBundleVersion` ara; widget/extension
+  eklenen bir projede sürüm anahtarları ana app ile birebir aynı olmalı.
 - **Xcode Cloud build kuralı:** `main`'e push, "Code push" start condition'ı
   ile otomatik bir Xcode Cloud build'i tetikliyor ve App Store Connect'e
   yüklüyor. `pubspec.yaml`'daki `version: X.Y.Z+N`'de **N (build numarası)
