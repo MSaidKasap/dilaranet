@@ -48,6 +48,10 @@ channel.setMethodCallHandler { call, result in
     }
 
     result("OK")
+  } else if call.method == "getMagneticDeclination" {
+    // iOS'ta flutter_compass_v2 zaten trueHeading (gerçek kuzey) döndürür,
+    // bu yüzden sapma düzeltmesine gerek yok.
+    result(0.0)
   } else {
     result(FlutterMethodNotImplemented)
   }

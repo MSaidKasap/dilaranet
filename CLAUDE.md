@@ -5,6 +5,39 @@ hataları** kayıt altına tutar. Yeni bir oturuma başlarken önce bunu oku.
 
 ## İlerleme (özet, en son değişiklikler üstte)
 
+- **Namaz vakitleri v2 ile eşitlendi** (`lib/v3/data/prayer.dart`,
+  `prayer_page.dart`). Çekirdek zaten aynıydı (aladhan `method=13`,
+  `adjustment=1`; nominatim ters geokod; widget senkronu). v2'de olup v3'te
+  eksik olan 5 davranış eklendi: (1) **Konum değişikliği tespiti** — çekilen
+  konum `v3_prayer_loc`'a yazılır; `load()` önbelleği anında döndürür ama
+  arka planda `_maybeRefreshForLocation` düşük doğrulukta konum alıp v2'nin
+  ~0.1° (~10 km) eşiğiyle karşılaştırır, şehir değiştiyse taze veri çekip
+  `V3PrayerRepository.revision` (ValueNotifier) artırır; `prayer_page` bunu
+  dinleyip yeniden yükler. (2) Ön yükleme **7 → 30 gün** (8'erli paralel
+  gruplar). (3) Yatsı sonrası geri sayım artık **yarının İmsak'ına** döner
+  (`V3PrayerTimes.tomorrowFajr` + `nextPrayer` kaydına `tomorrow` alanı;
+  "İmsak (yarın)" etiketi). (4) Bildirim ufku **bugün+yarın → 7 gün**
+  (iOS 64 bekleyen bildirim sınırının altında; `scheduleForDay` zaten geçmiş
+  vakitleri atlıyor). (5) `getCurrentPosition`'a **15 sn zaman sınırı**
+  (v2'deki gibi).
+- **Kıble pusulası elden geçirildi** (`lib/v3/pages/qibla_page.dart`): (1)
+  Akış artık iki fazlı — **önce pusula kalibrasyonu** (∞ animasyonu + 3
+  kademeli doğruluk ölçeri, `CompassEvent.accuracy` izlenir; iOS'ta derece
+  hata ≤20, Android'de 15/30 sabiti ~1.4 sn sabit kalınca ilerler; 8 sn
+  sonra "atla" butonu; 5 sn'de hiç veri gelmezse sensör yok sayılır),
+  **sonra taze konum** (`getLastKnownPosition` yerine
+  `getCurrentPosition(high, 20 sn)`, başarısızsa son bilinene "Yaklaşık
+  konum" etiketiyle düşer). (2) **Gerçek kuzey düzeltmesi:**
+  `flutter_compass_v2` 1.0.3'te iOS `trueHeading` döndürür ama **Android
+  manyetik kuzey** döndürür (paket içindeki WMM/GeomagneticField kodu ölü,
+  event yolunda çağrılmıyor) — Türkiye'de ~6° sapma. Çözüm: yeni native
+  `getMagneticDeclination` MethodChannel'ı (`net.dilara.social/widget`
+  kanalına eklendi): Android'de `android.hardware.GeomagneticField(lat,lng,
+  alt,now).declination`, iOS'ta 0. `trueHeading = manyetik + declination`.
+  Kıble açısı zaten büyük-çember (gerçek kuzey) hesabı. (3) Uyarlanır
+  yumuşatma (büyük açı farkında hızlı, küçükte stabil). **Not:** yerelde
+  disk %100 dolu olduğu için `flutter build` ile derleme doğrulanamadı;
+  `flutter analyze` temiz.
 - **"Preparing build for App Store Connect failed" — 2. kök neden (5 Eyl
   2026):** Bu sefer build numarası değil, **widget extension'ın sürüm
   uyuşmazlığıydı.** `DilaraWidgetExtension` target'ı `project.pbxproj`'de

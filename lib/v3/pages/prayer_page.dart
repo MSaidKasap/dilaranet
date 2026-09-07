@@ -28,12 +28,20 @@ class _V3PrayerPageState extends State<V3PrayerPage> {
     super.initState();
     _load();
     _ticker = Timer.periodic(const Duration(seconds: 1), (_) => _tick());
+    // Arka planda konum değişikliği tespit edilip taze veri çekilirse yeniden
+    // yükle (v2'deki "şehir değişti" davranışı).
+    V3PrayerRepository.revision.addListener(_onRevision);
   }
 
   @override
   void dispose() {
     _ticker?.cancel();
+    V3PrayerRepository.revision.removeListener(_onRevision);
     super.dispose();
+  }
+
+  void _onRevision() {
+    if (mounted) _load();
   }
 
   Future<void> _load({bool force = false}) async {
@@ -72,8 +80,9 @@ class _V3PrayerPageState extends State<V3PrayerPage> {
       });
       return;
     }
+    final label = V3PrayerTimes.trNames[next.key] ?? next.key;
     setState(() {
-      _nextName = V3PrayerTimes.trNames[next.key] ?? next.key;
+      _nextName = next.tomorrow ? '$label (yarın)' : label;
       _remaining = next.at.difference(DateTime.now());
       if (_remaining.isNegative) _remaining = Duration.zero;
     });
@@ -181,7 +190,7 @@ class _V3PrayerPageState extends State<V3PrayerPage> {
   Widget _prayerRow(String key) {
     final data = _data!;
     final next = data.nextPrayer;
-    final isNext = next != null && next.key == key;
+    final isNext = next != null && !next.tomorrow && next.key == key;
     final name = V3PrayerTimes.trNames[key] ?? key;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),

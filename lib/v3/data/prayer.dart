@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -10,20 +12,29 @@ import '../../utill/notifications.dart';
 
 /// V3 namaz vakitleri veri katmanı.
 ///
-/// Eski `lib/core/pages/prayer_times_page.dart` ile aynı kaynaklar:
-/// - Konum: geolocator
+/// Eski `lib/core/pages/prayer_times_page.dart` ile aynı kaynaklar/mantık:
+/// - Konum: geolocator (15 sn zaman sınırı)
 /// - Ters coğrafi kodlama: nominatim.openstreetmap.org
-/// - Vakitler: api.aladhan.com (method=13, adjustment=1)
-/// Önbellek sqflite yerine SharedPreferences (7 gün) ile tutulur.
+/// - Vakitler: api.aladhan.com (method=13 Diyanet, adjustment=1)
+/// - **30 günlük** ön yükleme (v2 ile aynı), önbellek SharedPreferences'ta.
+/// - **Konum değişikliği tespiti** (v2 ile aynı ~10 km eşiği): önbellek
+///   açılışta anında döner, arka planda konum kontrol edilir; şehir
+///   değiştiyse taze veri çekilip [revision] artırılır (dinleyen ekran
+///   yeniden yükler).
 class V3PrayerTimes {
   final String locationName;
   final DateTime date;
   final Map<String, String> times; // Fajr, Sunrise, Dhuhr, Asr, Maghrib, Isha
 
+  /// Bir sonraki günün ilk vakti (İmsak) — bugünkü vakitlerin hepsi geçince
+  /// geri sayımın yarına dönebilmesi için (v2 davranışı).
+  final DateTime? tomorrowFajr;
+
   const V3PrayerTimes({
     required this.locationName,
     required this.date,
     required this.times,
+    this.tomorrowFajr,
   });
 
   static const order = ['Fajr', 'Sunrise', 'Dhuhr', 'Asr', 'Maghrib', 'Isha'];
@@ -36,12 +47,17 @@ class V3PrayerTimes {
     'Isha': 'Yatsı',
   };
 
-  /// Bugünün geçmiş/sıradaki vaktini hesaplar.
-  ({String key, DateTime at})? get nextPrayer {
+  /// Bugünün sıradaki vakti; hepsi geçtiyse yarının İmsak'ı (`tomorrow: true`).
+  ({String key, DateTime at, bool tomorrow})? get nextPrayer {
     final now = DateTime.now();
     for (final key in const ['Fajr', 'Dhuhr', 'Asr', 'Maghrib', 'Isha']) {
       final at = _dateTimeFor(key);
-      if (at != null && at.isAfter(now)) return (key: key, at: at);
+      if (at != null && at.isAfter(now)) {
+        return (key: key, at: at, tomorrow: false);
+      }
+    }
+    if (tomorrowFajr != null && tomorrowFajr!.isAfter(now)) {
+      return (key: 'Fajr', at: tomorrowFajr!, tomorrow: true);
     }
     return null;
   }
@@ -62,41 +78,150 @@ class V3PrayerRepository {
   static const _kaabaFallback = 'Mekke';
   static final _notifications = NotificationService();
 
-  /// Konum al → vakitleri çek (7 gün) → önbelleğe yaz → bugünü döndür.
-  /// Her çağrıda iOS/Android ana ekran widget'ını da günceller (bkz.
-  /// `_syncWidget` — v2'de vardı, v3'e taşınmamıştı).
+  static const _cacheKey = 'v3_prayer_cache';
+  static const _locKey = 'v3_prayer_loc'; // "lat,lng"
+  static const _prefetchDays = 30;
+  static const _notifyDays = 7; // iOS 64 bekleyen bildirim sınırının altında
+  static const _locChangeThreshold = 0.1; // ~10 km (v2 ile aynı)
+
+  /// Arka planda konum kontrolü taze veri çekince artar; ekranlar dinleyip
+  /// yeniden yükler (proje deseni: singleton + ValueNotifier).
+  static final ValueNotifier<int> revision = ValueNotifier(0);
+  static bool _bgRefreshing = false;
+
+  /// Konum al → vakitleri çek (30 gün) → önbelleğe yaz → bugünü döndür.
+  /// Önbellek varsa anında döner ve arka planda konum değişikliği kontrolü
+  /// yapar. Her çağrıda ana ekran widget'ını da günceller.
   static Future<V3PrayerTimes> load({bool forceRefresh = false}) async {
     final prefs = await SharedPreferences.getInstance();
 
     if (!forceRefresh) {
       final cached = _readCache(prefs, DateTime.now());
       if (cached != null) {
-        await _syncWidget(cached);
-        return cached;
+        final withTomorrow = _attachTomorrow(prefs, cached);
+        await _syncWidget(withTomorrow);
+        // Arka planda: şehir değiştiyse taze veri çek (beklenmez).
+        unawaited(_maybeRefreshForLocation(prefs));
+        return withTomorrow;
       }
     }
 
     final pos = await _position();
     final locationName = await _reverseGeocode(pos.latitude, pos.longitude);
-    final week = await _fetchWeek(pos.latitude, pos.longitude, locationName);
+    final week =
+        await _fetchDays(pos.latitude, pos.longitude, locationName, _prefetchDays);
+    await _writeCache(prefs, week, pos.latitude, pos.longitude);
 
-    // Önbelleğe yaz
+    final today = _pickToday(week);
+    final withTomorrow = _attachTomorrow(prefs, today);
+    await _syncWidget(withTomorrow);
+    return withTomorrow;
+  }
+
+  // ---- Önbellek yazımı / okuması ----
+
+  static Future<void> _writeCache(SharedPreferences prefs,
+      List<V3PrayerTimes> days, double lat, double lng) async {
     final map = {
-      for (final day in week)
+      for (final day in days)
         DateFormat('yyyy-MM-dd').format(day.date): {
           'location': day.locationName,
           'times': day.times,
         }
     };
-    await prefs.setString('v3_prayer_cache', json.encode(map));
+    await prefs.setString(_cacheKey, json.encode(map));
+    await prefs.setString(_locKey, '$lat,$lng');
+  }
 
+  static V3PrayerTimes _pickToday(List<V3PrayerTimes> week) {
     final todayKey = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final today = week.firstWhere(
+    return week.firstWhere(
       (d) => DateFormat('yyyy-MM-dd').format(d.date) == todayKey,
       orElse: () => week.first,
     );
-    await _syncWidget(today);
-    return today;
+  }
+
+  static V3PrayerTimes _attachTomorrow(
+      SharedPreferences prefs, V3PrayerTimes today) {
+    final tomorrow =
+        _readCache(prefs, DateTime.now().add(const Duration(days: 1)));
+    final fajr = tomorrow?.dateTimeFor('Fajr');
+    return V3PrayerTimes(
+      locationName: today.locationName,
+      date: today.date,
+      times: today.times,
+      tomorrowFajr: fajr,
+    );
+  }
+
+  static V3PrayerTimes? _readCache(SharedPreferences prefs, DateTime day) {
+    final raw = prefs.getString(_cacheKey);
+    if (raw == null) return null;
+    try {
+      final map = json.decode(raw) as Map<String, dynamic>;
+      final key = DateFormat('yyyy-MM-dd').format(day);
+      final entry = map[key] as Map<String, dynamic>?;
+      if (entry == null) return null;
+      return V3PrayerTimes(
+        locationName: '${entry['location'] ?? _kaabaFallback}',
+        date: DateTime(day.year, day.month, day.day),
+        times: Map<String, String>.from(entry['times'] as Map),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  // ---- Konum değişikliği tespiti (arka plan) ----
+
+  static Future<void> _maybeRefreshForLocation(SharedPreferences prefs) async {
+    if (_bgRefreshing) return;
+    _bgRefreshing = true;
+    try {
+      // İzin zaten yoksa dokunma (kullanıcıya arka planda dialog çıkmasın).
+      final perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied ||
+          perm == LocationPermission.deniedForever) {
+        return;
+      }
+      if (!await Geolocator.isLocationServiceEnabled()) return;
+
+      Position pos;
+      try {
+        pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.low,
+            timeLimit: Duration(seconds: 10),
+          ),
+        );
+      } catch (_) {
+        return;
+      }
+
+      final saved = prefs.getString(_locKey);
+      if (saved != null) {
+        final parts = saved.split(',');
+        final sLat = double.tryParse(parts.first);
+        final sLng = parts.length > 1 ? double.tryParse(parts[1]) : null;
+        if (sLat != null && sLng != null) {
+          final moved = (sLat - pos.latitude).abs() > _locChangeThreshold ||
+              (sLng - pos.longitude).abs() > _locChangeThreshold;
+          if (!moved) return; // şehir aynı → önbellek geçerli
+        }
+      }
+
+      // Şehir değişti (veya kayıt yok): taze veri çek.
+      final locationName = await _reverseGeocode(pos.latitude, pos.longitude);
+      final days = await _fetchDays(
+          pos.latitude, pos.longitude, locationName, _prefetchDays);
+      await _writeCache(prefs, days, pos.latitude, pos.longitude);
+      await _syncWidget(_attachTomorrow(prefs, _pickToday(days)));
+      revision.value++;
+    } catch (_) {
+      // sessiz — önbellek ile devam
+    } finally {
+      _bgRefreshing = false;
+    }
   }
 
   // ---- Ana ekran widget'ı (iOS App Group + Android SharedPreferences) ----
@@ -121,23 +246,7 @@ class V3PrayerRepository {
     }
   }
 
-  static V3PrayerTimes? _readCache(SharedPreferences prefs, DateTime day) {
-    final raw = prefs.getString('v3_prayer_cache');
-    if (raw == null) return null;
-    try {
-      final map = json.decode(raw) as Map<String, dynamic>;
-      final key = DateFormat('yyyy-MM-dd').format(day);
-      final entry = map[key] as Map<String, dynamic>?;
-      if (entry == null) return null;
-      return V3PrayerTimes(
-        locationName: '${entry['location'] ?? _kaabaFallback}',
-        date: DateTime(day.year, day.month, day.day),
-        times: Map<String, String>.from(entry['times'] as Map),
-      );
-    } catch (_) {
-      return null;
-    }
-  }
+  // ---- Konum + API ----
 
   static Future<Position> _position() async {
     final enabled = await Geolocator.isLocationServiceEnabled();
@@ -156,7 +265,10 @@ class V3PrayerRepository {
       throw Exception('Konum izni verilmedi.');
     }
     return Geolocator.getCurrentPosition(
-      locationSettings: const LocationSettings(accuracy: LocationAccuracy.high),
+      locationSettings: const LocationSettings(
+        accuracy: LocationAccuracy.high,
+        timeLimit: Duration(seconds: 15),
+      ),
     );
   }
 
@@ -166,7 +278,7 @@ class V3PrayerRepository {
         Uri.parse(
             'https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lng&accept-language=tr'),
         headers: {'User-Agent': 'DilaraApp/1.0'},
-      );
+      ).timeout(const Duration(seconds: 10));
       if (res.statusCode == 200) {
         final addr = (json.decode(res.body)['address'] ?? {}) as Map;
         final parts = [
@@ -179,30 +291,51 @@ class V3PrayerRepository {
     return _kaabaFallback;
   }
 
-  static Future<List<V3PrayerTimes>> _fetchWeek(
-      double lat, double lng, String locationName) async {
-    final result = <V3PrayerTimes>[];
+  static Future<List<V3PrayerTimes>> _fetchDays(
+      double lat, double lng, String locationName, int count) async {
     final today = DateTime.now();
-    for (var i = 0; i < 7; i++) {
-      final day = today.add(Duration(days: i));
+    final result = List<V3PrayerTimes?>.filled(count, null);
+
+    // v2 gibi paralel — ancak API'yi yormamak için 8'erli gruplar.
+    for (var start = 0; start < count; start += 8) {
+      final end = (start + 8).clamp(0, count);
+      await Future.wait([
+        for (var i = start; i < end; i++)
+          _fetchDay(lat, lng, locationName, today.add(Duration(days: i)))
+              .then((d) => result[i] = d),
+      ]);
+    }
+
+    final days = result.whereType<V3PrayerTimes>().toList();
+    if (days.isEmpty) {
+      throw Exception('Namaz vakitleri alınamadı. İnternet bağlantınızı '
+          'kontrol edin.');
+    }
+    return days;
+  }
+
+  static Future<V3PrayerTimes?> _fetchDay(
+      double lat, double lng, String locationName, DateTime day) async {
+    try {
       final dateStr = DateFormat('dd-MM-yyyy').format(day);
       final res = await http.get(Uri.parse(
-          'https://api.aladhan.com/v1/timings/$dateStr?latitude=$lat&longitude=$lng&method=13&adjustment=1'));
-      if (res.statusCode != 200) {
-        throw Exception('Namaz vakitleri alınamadı (${res.statusCode})');
-      }
+              'https://api.aladhan.com/v1/timings/$dateStr?latitude=$lat&longitude=$lng&method=13&adjustment=1'))
+          .timeout(const Duration(seconds: 15));
+      if (res.statusCode != 200) return null;
+      final data = json.decode(res.body);
       final timings =
-          (json.decode(res.body)['data']['timings'] ?? {}) as Map<String, dynamic>;
-      result.add(V3PrayerTimes(
+          (data['data']?['timings'] ?? {}) as Map<String, dynamic>;
+      if (timings.isEmpty) return null;
+      return V3PrayerTimes(
         locationName: locationName,
         date: DateTime(day.year, day.month, day.day),
         times: {
-          for (final k in V3PrayerTimes.order)
-            k: _clean('${timings[k] ?? ''}'),
+          for (final k in V3PrayerTimes.order) k: _clean('${timings[k] ?? ''}'),
         },
-      ));
+      );
+    } catch (_) {
+      return null;
     }
-    return result;
   }
 
   static String _clean(String raw) => raw.split(' ').first.trim();
@@ -285,17 +418,14 @@ class V3PrayerRepository {
     }
   }
 
-  /// Bugün + yarın için, kayıtlı vakit/offset/sessiz ayarlarına göre tüm
-  /// bildirimleri iptal edip yeniden zamanlar. Bildirimler kapalıysa hiçbir
-  /// şey zamanlamaz (sadece iptal eder).
+  /// Önbellekteki önümüzdeki [_notifyDays] gün için, kayıtlı vakit/offset/
+  /// sessiz ayarlarına göre tüm bildirimleri iptal edip yeniden zamanlar.
+  /// Bildirimler kapalıysa sadece iptal eder.
   static Future<void> rescheduleAll({V3PrayerTimes? today}) async {
     await _notifications.cancelAllNotifications();
     if (!await notificationsEnabled()) return;
 
     final prefs = await SharedPreferences.getInstance();
-    final todayData = today ?? await load();
-    final tomorrowData =
-        _readCache(prefs, DateTime.now().add(const Duration(days: 1)));
 
     final offMin = await offsetMinutes();
     final offBefore = await offsetIsBefore();
@@ -308,23 +438,17 @@ class V3PrayerRepository {
     };
     final soundMap = {for (final key in V3PrayerTimes.order) key: 'default'};
 
-    await _notifications.scheduleForDay(
-      day: todayData.date,
-      times: todayData.times,
-      locationText: todayData.locationName,
-      offsetMinutes: offMin,
-      offsetIsBefore: offBefore,
-      prayerEnabled: enabledMap,
-      prayerSoundId: soundMap,
-      prayerIsSilent: silentMap,
-      prayerLabels: trNamesFor,
-    );
-
-    if (tomorrowData != null) {
+    final now = DateTime.now();
+    for (var i = 0; i < _notifyDays; i++) {
+      final dayDate = now.add(Duration(days: i));
+      final data = (i == 0 && today != null)
+          ? today
+          : _readCache(prefs, dayDate);
+      if (data == null) continue;
       await _notifications.scheduleForDay(
-        day: tomorrowData.date,
-        times: tomorrowData.times,
-        locationText: tomorrowData.locationName,
+        day: data.date,
+        times: data.times,
+        locationText: data.locationName,
         offsetMinutes: offMin,
         offsetIsBefore: offBefore,
         prayerEnabled: enabledMap,

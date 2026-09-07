@@ -170,6 +170,22 @@ class MainActivity : FlutterActivity() {
                         }
                         result.success("OK")
                     }
+                    "getMagneticDeclination" -> {
+                        // Manyetik sapma (declination): gerçek kuzey = manyetik kuzey + bu.
+                        // Kıble pusulası Android'de manyetik yön aldığı için gerekli.
+                        try {
+                            val args = call.arguments as? Map<*, *>
+                            val lat = (args?.get("lat") as? Number)?.toFloat() ?: 0f
+                            val lng = (args?.get("lng") as? Number)?.toFloat() ?: 0f
+                            val alt = (args?.get("alt") as? Number)?.toFloat() ?: 0f
+                            val field = android.hardware.GeomagneticField(
+                                lat, lng, alt, System.currentTimeMillis()
+                            )
+                            result.success(field.declination.toDouble())
+                        } catch (e: Exception) {
+                            result.error("ERROR", e.message, null)
+                        }
+                    }
                     "updateAndroidWidget" -> {
                         try {
                             val manager = AppWidgetManager.getInstance(this@MainActivity)
