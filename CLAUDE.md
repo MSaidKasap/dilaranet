@@ -5,6 +5,16 @@ hataları** kayıt altına tutar. Yeni bir oturuma başlarken önce bunu oku.
 
 ## İlerleme (özet, en son değişiklikler üstte)
 
+- **`project.pbxproj` `objectVersion = 70` → `pod install` kırıyor.** Xcode
+  16+ projeyi GUI'de açınca `objectVersion`'ı 54'ten 70'e yükseltiyor.
+  Yerel CocoaPods 1.16.2'nin `xcodeproj 1.27.0` gem'i 70'i tanımıyor:
+  *"[Xcodeproj] Unable to find compatibility version string for object
+  version `70`"*. `ci_post_clone.sh` `pod install --repo-update`
+  çalıştırdığı için **Xcode Cloud build'i de bu adımda patlar** (1.1.0+6 ve
+  +7 böyle başarısız oldu). **Çözüm/ders:** `project.pbxproj` commit
+  etmeden önce `git diff`'te `objectVersion` satırına bak; 70 görürsen 54'e
+  geri al (widget'lı proje 54 ile sorunsuz pod-install oluyor). 1.1.0+8 bu
+  düzeltmeyle çıktı.
 - **Namaz vakitleri v2 ile eşitlendi** (`lib/v3/data/prayer.dart`,
   `prayer_page.dart`). Çekirdek zaten aynıydı (aladhan `method=13`,
   `adjustment=1`; nominatim ters geokod; widget senkronu). v2'de olup v3'te
